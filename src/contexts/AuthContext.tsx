@@ -25,36 +25,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to retrieve session',
-          variant: 'destructive',
-        });
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to retrieve session',
+            variant: 'destructive',
+          });
+        }
+        
+        setSession(data?.session ?? null);
+        setUser(data?.session?.user ?? null);
+      } catch (err) {
+        console.error('Exception in getInitialSession:', err);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setIsLoading(false);
     };
 
     getInitialSession();
 
-    // Set up auth subscription
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-      }
-    );
+    try {
+      // Set up auth subscription
+      const { data: authListener } = supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setIsLoading(false);
+        }
+      );
 
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+      return () => {
+        if (authListener?.subscription?.unsubscribe) {
+          authListener.subscription.unsubscribe();
+        }
+      };
+    } catch (err) {
+      console.error('Exception in auth subscription:', err);
+      setIsLoading(false);
+      return () => {};
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -74,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       toast({
         title: 'Sign in failed',
-        description: error.message,
+        description: error.message || 'An error occurred during sign in',
         variant: 'destructive',
       });
     } finally {
@@ -98,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       toast({
         title: 'Sign up failed',
-        description: error.message,
+        description: error.message || 'An error occurred during sign up',
         variant: 'destructive',
       });
     } finally {
@@ -123,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to sign out',
+        description: 'Failed to sign out: ' + (error.message || 'Unknown error'),
         variant: 'destructive',
       });
     } finally {
