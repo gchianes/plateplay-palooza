@@ -1,9 +1,9 @@
-
 export interface StateData {
   id: string;
   name: string;
   abbreviation: string;
   spotted: boolean;
+  path?: string;
 }
 
 export const states: StateData[] = [
@@ -70,10 +70,16 @@ export const getProgress = (spottedStates: StateData[]): number => {
 
 export const sortStatesBySpotted = (statesList: StateData[]): StateData[] => {
   return [...statesList].sort((a, b) => {
-    // Spotted states first
     if (a.spotted && !b.spotted) return -1;
     if (!a.spotted && b.spotted) return 1;
-    // Then alphabetically
     return a.name.localeCompare(b.name);
   });
+};
+
+export const findStateByAbbreviation = (abbreviation: string): StateData | undefined => {
+  return states.find(state => state.abbreviation === abbreviation);
+};
+
+export const getSpottedStates = (): StateData[] => {
+  return states.filter(state => state.spotted);
 };
