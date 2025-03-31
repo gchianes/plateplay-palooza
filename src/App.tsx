@@ -89,4 +89,3 @@ const App = () => (
 );
 
 export default App;
-</lov-add-dependency>@supabase/supabase-js@latest</lov-add-dependency>
