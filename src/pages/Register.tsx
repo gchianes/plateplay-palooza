@@ -15,9 +15,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { MapPin, Mail, Github, Loader2 } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -32,7 +31,6 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const Register = () => {
   const { signUp, isLoading } = useAuth();
-  const [socialLoading, setSocialLoading] = React.useState<string | null>(null);
   
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -45,29 +43,6 @@ const Register = () => {
 
   const onSubmit = async (data: RegisterFormValues) => {
     await signUp(data.email, data.password);
-  };
-
-  const handleSocialLogin = async (provider: 'google' | 'github') => {
-    try {
-      setSocialLoading(provider);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-      
-      if (error) {
-        throw error;
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Login error',
-        description: error.message || 'Failed to sign in with social provider',
-        variant: 'destructive',
-      });
-      setSocialLoading(null);
-    }
   };
 
   return (
@@ -129,48 +104,6 @@ const Register = () => {
             </Button>
           </form>
         </Form>
-        
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-4 flex gap-2">
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => handleSocialLogin('google')}
-              disabled={!!socialLoading}
-            >
-              {socialLoading === 'google' ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Mail className="h-4 w-4 mr-2" />
-              )}
-              Google
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => handleSocialLogin('github')}
-              disabled={!!socialLoading}
-            >
-              {socialLoading === 'github' ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Github className="h-4 w-4 mr-2" />
-              )}
-              GitHub
-            </Button>
-          </div>
-        </div>
         
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
