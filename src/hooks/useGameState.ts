@@ -16,9 +16,11 @@ export function useGameState(user: User | null): UseGameStateReturn {
     if (!user) return;
 
     try {
+      // First try to load an existing game
       const { data: games } = await supabase
         .from('games')
         .select('*')
+        .eq('user_id', user.id)  // Add filter by user_id to ensure we get the user's games
         .order('updated_at', { ascending: false })
         .limit(1);
 
@@ -26,13 +28,13 @@ export function useGameState(user: User | null): UseGameStateReturn {
         const gameId = games[0].id;
         setCurrentGameId(gameId);
 
-        const { data: players } = await supabase
+        const { data: playersData } = await supabase
           .from('players')
           .select('*')
           .eq('game_id', gameId);
 
-        if (players && players.length > 0) {
-          const formattedPlayers = players.map(p => ({
+        if (playersData && playersData.length > 0) {
+          const formattedPlayers = playersData.map(p => ({
             id: parseInt(p.id),
             name: p.name,
             states: p.states as string[],
@@ -40,6 +42,7 @@ export function useGameState(user: User | null): UseGameStateReturn {
           }));
           setPlayers(formattedPlayers);
           setActivePlayer(formattedPlayers[0].id);
+          
           const allSpottedStates = formattedPlayers.reduce((acc, player) => 
             [...acc, ...player.states], [] as string[]);
           setGlobalSpottedStates([...new Set(allSpottedStates)]);
@@ -47,6 +50,7 @@ export function useGameState(user: User | null): UseGameStateReturn {
         }
       }
 
+      // If no game exists, create a new one
       const { data: newGame } = await supabase
         .from('games')
         .insert({ user_id: user.id })
@@ -55,6 +59,8 @@ export function useGameState(user: User | null): UseGameStateReturn {
 
       if (newGame) {
         setCurrentGameId(newGame.id);
+        
+        // Create initial player
         const { data: newPlayer } = await supabase
           .from('players')
           .insert({

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Player } from '@/types/player';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,7 +56,8 @@ export function PlayerManagement({
   };
 
   const handleAddPlayer = async () => {
-    if (!currentGameId || players.length >= 6) {
+    // Fix: Check if players array exists and its length
+    if (!currentGameId || (players && players.length >= 6)) {
       toast({
         title: "Maximum players reached",
         description: "You can only have up to 6 players in a game.",
@@ -69,7 +71,7 @@ export function PlayerManagement({
         .from('players')
         .insert({
           game_id: currentGameId,
-          name: `Player ${players.length + 1}`,
+          name: `Player ${players ? players.length + 1 : 1}`,
           states: [],
           score: 0
         })
@@ -83,7 +85,13 @@ export function PlayerManagement({
           states: newPlayer.states as string[],
           score: newPlayer.score
         };
-        setPlayers([...players, formattedPlayer]);
+        // Fix: Handle case where players might be undefined
+        setPlayers(players ? [...players, formattedPlayer] : [formattedPlayer]);
+        
+        // If this is the first player, set it as active
+        if (!players || players.length === 0) {
+          setActivePlayer(formattedPlayer.id);
+        }
       }
     } catch (error) {
       console.error('Error adding player:', error);
@@ -96,7 +104,8 @@ export function PlayerManagement({
   };
 
   const handleRemovePlayer = async (playerId: number) => {
-    if (!currentGameId || players.length <= 1) return;
+    // Fix: Check if players exists and has more than 1 element
+    if (!currentGameId || !players || players.length <= 1) return;
 
     try {
       await supabase
@@ -116,7 +125,7 @@ export function PlayerManagement({
       const updatedPlayers = players.filter(p => p.id !== playerId);
       setPlayers(updatedPlayers);
       
-      if (activePlayer === playerId) {
+      if (activePlayer === playerId && updatedPlayers.length > 0) {
         setActivePlayer(updatedPlayers[0].id);
       }
     } catch (error) {
@@ -131,7 +140,7 @@ export function PlayerManagement({
 
   return (
     <PlayerScores 
-      players={players}
+      players={players || []}  // Fix: Provide empty array if players is undefined
       activePlayer={activePlayer}
       onPlayerAdd={handleAddPlayer}
       onPlayerRemove={handleRemovePlayer}
