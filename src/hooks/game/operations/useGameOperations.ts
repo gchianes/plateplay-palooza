@@ -15,6 +15,7 @@ export const useGameOperations = (userId: string | undefined) => {
     }
 
     try {
+      console.log("Attempting to load game for user:", userId);
       const { data: games, error: gamesError } = await supabase
         .from('games')
         .select('*')
@@ -24,10 +25,7 @@ export const useGameOperations = (userId: string | undefined) => {
 
       if (gamesError) {
         console.error("Error fetching games:", gamesError);
-        // Fall back to mock game ID on error
-        const mockId = "mock-game-id";
-        setCurrentGameId(mockId);
-        return mockId;
+        throw gamesError;
       }
 
       if (games && games.length > 0) {
@@ -36,7 +34,6 @@ export const useGameOperations = (userId: string | undefined) => {
         return games[0].id;
       }
       
-      // No existing game found, create a new one
       return await createNewGame();
     } catch (error) {
       console.error("Error loading game:", error);
@@ -55,6 +52,7 @@ export const useGameOperations = (userId: string | undefined) => {
     }
 
     try {
+      console.log("Creating new game for user:", userId);
       const { data: newGame, error: newGameError } = await supabase
         .from('games')
         .insert({ 
@@ -66,15 +64,7 @@ export const useGameOperations = (userId: string | undefined) => {
 
       if (newGameError) {
         console.error("Error creating new game:", newGameError);
-        toast({
-          title: "Error",
-          description: "Failed to create new game. Using offline mode.",
-          duration: 3000,
-        });
-        // Fall back to mock game ID on error
-        const mockId = "mock-game-id";
-        setCurrentGameId(mockId);
-        return mockId;
+        throw newGameError;
       }
 
       if (newGame) {
@@ -84,19 +74,16 @@ export const useGameOperations = (userId: string | undefined) => {
       }
     } catch (error) {
       console.error("Error in game creation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create game. Using offline mode.",
-        duration: 3000,
-      });
+      const mockId = "mock-game-id";
+      setCurrentGameId(mockId);
+      return mockId;
     }
-    // Final fallback
+    
     const mockId = "mock-game-id";
     setCurrentGameId(mockId);
     return mockId;
   };
 
-  // Helper function to validate UUID format
   const isValidUUID = (uuid: string): boolean => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return uuidRegex.test(uuid);

@@ -17,63 +17,90 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Create a proper UUID format mock user ID
-  const mockUserId = '00000000-0000-4000-a000-000000000000'; // Valid UUID format
-  
-  // Create a proper mock user that satisfies the User type
-  const mockUser = {
-    id: mockUserId,
-    email: 'demo@example.com',
-    app_metadata: {},
-    user_metadata: {},
-    aud: 'authenticated',
-    created_at: new Date().toISOString(),
-    role: '',
-    email_confirmed_at: new Date().toISOString(),
-    phone_confirmed_at: null,
-    last_sign_in_at: new Date().toISOString(),
-    confirmed_at: new Date().toISOString(),
-    email_change_sent_at: null,
-    new_email: null,
-    invited_at: null,
-    action_link: null,
-    phone: null,
-    recovery_sent_at: null,
-    identities: [],
-    factors: [],
-    updated_at: new Date().toISOString(),
-    banned_until: null,
-    confirmation_sent_at: null,
-    has_active_subscription: false,
-    deleted_at: null,
-  } as User;
-
-  const [user, setUser] = useState<User | null>(mockUser);
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Modify existing methods to be no-ops or return immediately
-  const signIn = async () => {
-    setUser(mockUser);
-    navigate('/');
+  useEffect(() => {
+    // First set up the auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing in:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign in. Please try again.",
+        duration: 3000,
+      });
+    }
   };
 
-  const signUp = async () => {
-    setUser(mockUser);
-    navigate('/');
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing up:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create account. Please try again.",
+        duration: 3000,
+      });
+    }
   };
 
   const signOut = async () => {
-    setUser(null);
-    navigate('/login');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        duration: 3000,
+      });
+    }
   };
 
+  // Provide auth context
   return (
     <AuthContext.Provider value={{ 
-      user: mockUser, 
-      session: null, 
-      isLoading: false, 
+      user, 
+      session, 
+      isLoading,
       signIn, 
       signUp, 
       signOut 
