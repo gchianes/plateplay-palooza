@@ -5,8 +5,6 @@ import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
 
 export const usePlayerOperations = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
-
   const fetchPlayers = async (gameId: string) => {
     const { data: playersData, error: playersError } = await supabase
       .from('players')
@@ -15,7 +13,7 @@ export const usePlayerOperations = () => {
 
     if (playersError) {
       console.error("Error fetching players:", playersError);
-      return;
+      return null;
     }
 
     if (playersData && playersData.length > 0) {
@@ -26,7 +24,6 @@ export const usePlayerOperations = () => {
         score: p.score
       }));
       
-      setPlayers(formattedPlayers);
       return formattedPlayers;
     }
     
@@ -48,7 +45,6 @@ export const usePlayerOperations = () => {
 
       if (newPlayerError) {
         console.error("Error creating initial player:", newPlayerError);
-        setDefaultPlayer();
         throw newPlayerError;
       }
 
@@ -59,7 +55,6 @@ export const usePlayerOperations = () => {
           states: newPlayer.states as string[],
           score: newPlayer.score
         };
-        setPlayers([formattedPlayer]);
         return formattedPlayer;
       }
     } catch (error) {
@@ -73,17 +68,22 @@ export const usePlayerOperations = () => {
     return null;
   };
 
-  const setDefaultPlayer = () => {
-    setPlayers([{
+  const setDefaultPlayer = (setPlayersStateFn?: (players: Player[]) => void) => {
+    const defaultPlayer = {
       id: 0,
       name: 'Player 1',
       states: [],
       score: 0
-    }]);
+    };
+    
+    if (setPlayersStateFn) {
+      setPlayersStateFn([defaultPlayer]);
+    }
+    
+    return defaultPlayer;
   };
 
   return {
-    players,
     fetchPlayers,
     createInitialPlayer,
     setDefaultPlayer

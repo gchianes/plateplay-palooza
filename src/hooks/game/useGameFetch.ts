@@ -9,18 +9,20 @@ interface UseGameFetchReturn {
   players: Player[];
   currentGameId: string | null;
   isLoading: boolean;
+  setPlayers: (players: Player[]) => void;
 }
 
 export function useGameFetch(user: User | null): UseGameFetchReturn {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [players, setPlayersState] = useState<Player[]>([]);
   const { currentGameId, loadExistingGame, createNewGame } = useGameOperations(user?.id);
-  const { players, fetchPlayers, createInitialPlayer, setDefaultPlayer } = usePlayerOperations();
+  const { fetchPlayers, createInitialPlayer, setDefaultPlayer } = usePlayerOperations();
 
   useEffect(() => {
     if (user) {
       loadOrCreateGame();
     } else {
-      setDefaultPlayer();
+      setDefaultPlayer(setPlayersState);
       setIsLoading(false);
     }
   }, [user]);
@@ -39,21 +41,40 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
       
       if (existingGameId) {
         const existingPlayers = await fetchPlayers(existingGameId);
-        if (!existingPlayers) {
-          await createInitialPlayer(existingGameId);
+        if (existingPlayers) {
+          setPlayersState(existingPlayers);
+        } else {
+          const initialPlayer = await createInitialPlayer(existingGameId);
+          if (initialPlayer) {
+            setPlayersState([initialPlayer]);
+          } else {
+            setDefaultPlayer(setPlayersState);
+          }
         }
       } else {
         const newGameId = await createNewGame();
         if (newGameId) {
-          await createInitialPlayer(newGameId);
+          const initialPlayer = await createInitialPlayer(newGameId);
+          if (initialPlayer) {
+            setPlayersState([initialPlayer]);
+          } else {
+            setDefaultPlayer(setPlayersState);
+          }
+        } else {
+          setDefaultPlayer(setPlayersState);
         }
       }
     } catch (error) {
       console.error('Error loading/creating game:', error);
+      setDefaultPlayer(setPlayersState);
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { players, currentGameId, isLoading };
+  const setPlayers = (newPlayers: Player[]) => {
+    setPlayersState(newPlayers);
+  };
+
+  return { players, currentGameId, isLoading, setPlayers };
 }
