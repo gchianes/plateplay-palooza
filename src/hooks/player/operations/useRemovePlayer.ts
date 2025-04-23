@@ -79,12 +79,21 @@ export function useRemovePlayer({
       console.log("Removing player:", playerId);
       
       // In Supabase, we need the database ID which is stored in playerToRemove.databaseId
-      // If we don't have a databaseId, we'll try using the numeric ID as a string
+      if (!playerToRemove.databaseId) {
+        console.error('Player has no database ID:', playerId);
+        toast({
+          title: "Error",
+          description: "Player has no database ID",
+          duration: 3000,
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('players')
         .delete()
         .eq('game_id', currentGameId)
-        .eq('id', playerToRemove.databaseId || playerId);
+        .eq('id', playerToRemove.databaseId);
 
       if (error) {
         console.error('Error removing player:', error);
