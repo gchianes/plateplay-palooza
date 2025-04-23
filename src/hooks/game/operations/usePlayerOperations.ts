@@ -35,7 +35,7 @@ export const usePlayerOperations = () => {
 
   const createInitialPlayer = async (gameId: string) => {
     if (!gameId || gameId === "mock-game-id") {
-      return setDefaultPlayer();
+      return createDefaultPlayer();
     }
     
     try {
@@ -52,7 +52,7 @@ export const usePlayerOperations = () => {
 
       if (newPlayerError) {
         console.error("Error creating initial player:", newPlayerError);
-        return setDefaultPlayer();
+        return createDefaultPlayer();
       }
 
       if (newPlayer) {
@@ -67,10 +67,10 @@ export const usePlayerOperations = () => {
       console.error("Error in player creation:", error);
     }
     
-    return setDefaultPlayer();
+    return createDefaultPlayer();
   };
 
-  const setDefaultPlayer = () => {
+  const createDefaultPlayer = (): Player => {
     console.log("Creating default local player");
     return {
       id: 1,
@@ -80,9 +80,20 @@ export const usePlayerOperations = () => {
     };
   };
 
+  const setDefaultPlayer = (setPlayersFunc?: React.Dispatch<React.SetStateAction<Player[]>>) => {
+    const defaultPlayer = createDefaultPlayer();
+    
+    if (setPlayersFunc) {
+      setPlayersFunc([defaultPlayer]);
+    }
+    
+    return defaultPlayer;
+  };
+
   return {
     fetchPlayers,
     createInitialPlayer,
-    setDefaultPlayer
+    setDefaultPlayer,
+    createDefaultPlayer
   };
 };
