@@ -20,7 +20,13 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
     if (user) {
       loadOrCreateGame();
     } else {
-      setPlayers([]);
+      // Initialize with a default player even when not logged in
+      setPlayers([{
+        id: 0,
+        name: 'Player 1',
+        states: [],
+        score: 0
+      }]);
       setCurrentGameId(null);
       setIsLoading(false);
     }
@@ -147,6 +153,13 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
 
       if (newPlayerError) {
         console.error("Error creating initial player:", newPlayerError);
+        // Even if there's an error, provide a default player
+        setPlayers([{
+          id: 0,
+          name: 'Player 1',
+          states: [],
+          score: 0
+        }]);
         throw newPlayerError;
       }
 
