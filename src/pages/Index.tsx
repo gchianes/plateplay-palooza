@@ -9,7 +9,7 @@ import { GameState } from '@/components/GameState';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
-  const [isMapVisible, setIsMapVisible] = useState(false);
+  const [isMapVisible, setIsMapVisible] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
   

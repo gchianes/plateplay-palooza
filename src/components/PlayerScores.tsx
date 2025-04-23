@@ -14,6 +14,7 @@ interface PlayerScoresProps {
   onPlayerRemove: (id: number) => void;
   onPlayerSelect: (id: number) => void;
   onPlayerNameChange: (id: number, name: string) => void;
+  canAddPlayer?: boolean;
 }
 
 const PlayerScores: React.FC<PlayerScoresProps> = ({
@@ -23,6 +24,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   onPlayerRemove,
   onPlayerSelect,
   onPlayerNameChange,
+  canAddPlayer = true,
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
@@ -56,6 +58,8 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
             variant="outline" 
             size="sm"
             onClick={onPlayerAdd}
+            disabled={!canAddPlayer}
+            title={!canAddPlayer ? "Game not initialized properly" : undefined}
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Player
@@ -115,6 +119,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => onPlayerRemove(player.id)}
+                    disabled={!canAddPlayer}
                   >
                     <X className="h-4 w-4 text-muted-foreground" />
                   </Button>

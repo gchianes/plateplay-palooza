@@ -45,6 +45,7 @@ export function PlayerManagement({
       onPlayerRemove={handleRemovePlayer}
       onPlayerSelect={setActivePlayer}
       onPlayerNameChange={handleNameChange}
+      canAddPlayer={!!currentGameId}
     />
   );
 }
