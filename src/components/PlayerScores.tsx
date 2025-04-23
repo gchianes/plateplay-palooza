@@ -33,19 +33,19 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     console.log("Starting edit for player:", player);
     
     // Safely handle player.id regardless of its type
-    const id = player.id;
-    
-    // Handle different possible id formats
-    let playerId = 0;
-    
-    if (typeof id === 'number') {
-      playerId = id;
-    } else if (typeof id === 'object' && id !== null && id._type === 'Number') {
-      playerId = parseInt(id.value) || 0;
-    }
-    
+    let playerId = getNumericId(player.id);
     setEditingId(playerId);
     setEditName(player.name);
+  };
+
+  // Helper function to safely convert any type of ID to a number
+  const getNumericId = (id: any): number => {
+    if (typeof id === 'number') {
+      return id;
+    } else if (typeof id === 'object' && id !== null && typeof id._type === 'string' && id._type === 'Number') {
+      return parseInt(id.value) || 0;
+    }
+    return 0;
   };
 
   const handleEditSave = () => {
@@ -89,15 +89,8 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
       <ScrollArea className="h-[200px]">
         <div className="space-y-2">
           {players.map((player) => {
-            // Safely extract player ID regardless of its type
-            const id = player.id;
-            let playerId = 0;
-            
-            if (typeof id === 'number') {
-              playerId = id;
-            } else if (typeof id === 'object' && id !== null && id._type === 'Number') {
-              playerId = parseInt(id.value) || 0;
-            }
+            // Safely extract player ID using our helper function
+            const playerId = getNumericId(player.id);
             
             console.log(`Rendering player: ${player.name}, ID: ${playerId}, Type: ${typeof playerId}`);
                   

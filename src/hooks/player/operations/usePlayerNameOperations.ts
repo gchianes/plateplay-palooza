@@ -20,10 +20,7 @@ export function usePlayerNameOperations({
     console.log(`Player object:`, players.find(p => {
       // Safely compare player ids regardless of their format
       const id = p.id;
-      const numericId = typeof id === 'object' && id !== null && id._type === 'Number'
-        ? parseInt(id.value) || 0
-        : (typeof id === 'number' ? id : 0);
-      
+      const numericId = getNumericId(id);
       return numericId === playerId;
     }));
     
@@ -66,6 +63,16 @@ export function usePlayerNameOperations({
     }
   };
 
+  // Helper function to safely convert any type of ID to a number
+  const getNumericId = (id: any): number => {
+    if (typeof id === 'number') {
+      return id;
+    } else if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
+      return parseInt(id.value) || 0;
+    }
+    return 0;
+  };
+
   const updateLocalPlayerName = (playerId: number, newName: string) => {
     console.log(`Updating local player data. ID: ${playerId}, New name: ${newName}`);
     
@@ -74,9 +81,7 @@ export function usePlayerNameOperations({
       const id = player.id;
       
       // Safely compare player ids regardless of their format
-      const currentId = typeof id === 'object' && id !== null && id._type === 'Number'
-        ? parseInt(id.value) || 0
-        : (typeof id === 'number' ? id : 0);
+      const currentId = getNumericId(id);
         
       console.log(`Checking player: ${currentId} against: ${playerId}`);
       
