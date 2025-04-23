@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Player } from '@/types/player';
 import { toast } from '@/components/ui/use-toast';
 import { User } from '@supabase/supabase-js';
+import { UseGameStateReturn } from '@/types/game';
 
-export function useGameState(user: User | null) {
+export function useGameState(user: User | null): UseGameStateReturn {
   const [players, setPlayers] = useState<Player[]>([]);
   const [activePlayer, setActivePlayer] = useState<number>(0);
   const [globalSpottedStates, setGlobalSpottedStates] = useState<string[]>([]);

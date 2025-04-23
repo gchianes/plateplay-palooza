@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Player } from '@/types/player';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,9 +105,10 @@ export function PlayerManagement({
 
       const playerToRemove = players.find(p => p.id === playerId);
       if (playerToRemove) {
-        setGlobalSpottedStates(prev => 
-          prev.filter(stateId => !playerToRemove.states.includes(stateId))
+        const updatedStates = globalSpottedStates.filter(
+          stateId => !playerToRemove.states.includes(stateId)
         );
+        setGlobalSpottedStates(updatedStates);
       }
       
       const updatedPlayers = players.filter(p => p.id !== playerId);

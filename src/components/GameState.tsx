@@ -58,14 +58,14 @@ export function GameState({
         .eq('id', activePlayer.toString());
 
       if (!hasState) {
-        setGlobalSpottedStates(prev => [...prev, stateId]);
+        setGlobalSpottedStates([...globalSpottedStates, stateId]);
         toast({
           title: `License plate spotted!`,
           description: `${currentPlayer.name} spotted ${states.find(s => s.id === stateId)?.name}`,
           duration: 3000,
         });
       } else {
-        setGlobalSpottedStates(prev => prev.filter(id => id !== stateId));
+        setGlobalSpottedStates(globalSpottedStates.filter(id => id !== stateId));
         toast({
           title: `Removed from spotted list`,
           description: `${states.find(s => s.id === stateId)?.name} removed from ${currentPlayer.name}'s collection`,
