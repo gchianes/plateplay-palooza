@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ScoreBoard from '@/components/ScoreBoard';
 import USMap from '@/components/USMap';
@@ -9,10 +9,20 @@ import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [statesList, setStatesList] = useState(states);
+  const [mapReady, setMapReady] = useState(false);
+  
   const spottedStates = statesList.filter(state => state.spotted);
   const score = calculateScore(spottedStates);
   const progress = getProgress(spottedStates);
   const sortedStates = sortStatesBySpotted(statesList);
+
+  // Ensure the map has time to properly initialize
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMapReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleToggleState = (stateId: string) => {
     const updatedStates = statesList.map(state => {
@@ -55,10 +65,16 @@ const Index = () => {
               progress={progress} 
               score={score} 
             />
-            <USMap 
-              states={statesList} 
-              onToggleState={handleToggleState} 
-            />
+            
+            {mapReady && (
+              <div className="border rounded-lg shadow-sm p-4 bg-white mt-4">
+                <h2 className="text-xl font-bold mb-3">United States Map</h2>
+                <USMap 
+                  states={statesList} 
+                  onToggleState={handleToggleState} 
+                />
+              </div>
+            )}
           </div>
           
           <div className="w-full md:w-5/12">
