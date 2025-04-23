@@ -64,7 +64,12 @@ export function usePlayerNameOperations({
     const updatedPlayers = players.map(player => {
       // Add a console log to debug the comparison
       console.log(`Checking player: ${player.id} (${typeof player.id}) against: ${playerId} (${typeof playerId})`);
-      return player.id === playerId 
+      // Ensure we're comparing numbers
+      const currentId = typeof player.id === 'object' && player.id !== null 
+        ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
+        : player.id;
+        
+      return currentId === playerId 
         ? { ...player, name: newName }
         : player;
     });

@@ -31,8 +31,11 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 
   const handleEditStart = (player: Player) => {
     console.log("Starting edit for player:", player);
-    setEditingId(player.id);
-    setEditName(player.name);
+    // Ensure the player.id is not null before setting it as the editingId
+    if (player.id !== null) {
+      setEditingId(player.id);
+      setEditName(player.name);
+    }
   };
 
   const handleEditSave = () => {
@@ -76,10 +79,10 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
       <ScrollArea className="h-[200px]">
         <div className="space-y-2">
           {players.map((player) => {
-            // Ensure player.id is a number
+            // Ensure player.id is a number and not null
             const playerId = typeof player.id === 'object' && player.id !== null 
               ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
-              : player.id;
+              : (player.id !== null ? player.id : 0);
 
             console.log(`Rendering player: ${player.name}, ID: ${playerId}, Type: ${typeof playerId}`);
                   
