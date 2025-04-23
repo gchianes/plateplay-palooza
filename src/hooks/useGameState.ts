@@ -23,7 +23,6 @@ export function useGameState(user: User | null): UseGameStateReturn {
       setIsLoading(true);
       console.log("Loading or creating game for user:", user.id);
       
-      // For development/testing, check if we have a mock user
       const userId = user.id;
       if (!userId) {
         console.error("No valid user ID found");
@@ -31,6 +30,7 @@ export function useGameState(user: User | null): UseGameStateReturn {
         return;
       }
 
+      console.log("Fetching games for userId:", userId);
       // First try to load an existing game
       const { data: games, error: gamesError } = await supabase
         .from('games')

@@ -25,7 +25,15 @@ export function PlayerManagement({
   setGlobalSpottedStates
 }: PlayerManagementProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
-    if (!currentGameId) return;
+    if (!currentGameId) {
+      console.error("No current game ID available for name change");
+      toast({
+        title: "Error",
+        description: "Game not initialized properly",
+        duration: 3000,
+      });
+      return;
+    }
 
     try {
       console.log(`Updating player ${playerId} name to ${newName} for game ${currentGameId}`);
@@ -68,7 +76,7 @@ export function PlayerManagement({
 
   const handleAddPlayer = async () => {
     if (!currentGameId) {
-      console.error("No current game ID available");
+      console.error("No current game ID available for adding player");
       toast({
         title: "Error",
         description: "Game not initialized properly",
@@ -147,6 +155,12 @@ export function PlayerManagement({
 
   const handleRemovePlayer = async (playerId: number) => {
     if (!currentGameId) {
+      console.error("No current game ID available for removing player");
+      toast({
+        title: "Error",
+        description: "Game not initialized properly",
+        duration: 3000,
+      });
       return;
     }
     
