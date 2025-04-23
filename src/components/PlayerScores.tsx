@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
@@ -29,12 +30,14 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   const [editName, setEditName] = useState("");
 
   const handleEditStart = (player: Player) => {
+    console.log("Starting edit for player:", player);
     setEditingId(player.id);
     setEditName(player.name);
   };
 
   const handleEditSave = () => {
     if (editingId !== null && editName.trim()) {
+      console.log(`Saving edit for player ID: ${editingId}, New name: ${editName.trim()}`);
       onPlayerNameChange(editingId, editName.trim());
       setEditingId(null);
     }
@@ -72,64 +75,73 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 
       <ScrollArea className="h-[200px]">
         <div className="space-y-2">
-          {players.map((player) => (
-            <div
-              key={player.id}
-              className={cn(
-                "flex items-center justify-between p-3 rounded-lg border",
-                activePlayer === player.id ? "bg-secondary/20 border-secondary" : "bg-background"
-              )}
-            >
-              <button
-                className="flex items-center space-x-3 flex-1"
-                onClick={() => onPlayerSelect(player.id)}
+          {players.map((player) => {
+            // Ensure player.id is a number
+            const playerId = typeof player.id === 'object' && player.id !== null 
+              ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
+              : player.id;
+
+            console.log(`Rendering player: ${player.name}, ID: ${playerId}, Type: ${typeof playerId}`);
+                  
+            return (
+              <div
+                key={playerId}
+                className={cn(
+                  "flex items-center justify-between p-3 rounded-lg border",
+                  activePlayer === playerId ? "bg-secondary/20 border-secondary" : "bg-background"
+                )}
               >
-                <Trophy className="h-4 w-4 text-accent" />
-                <div className="flex flex-col flex-1">
-                  {editingId === player.id ? (
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      onKeyDown={handleKeyPress}
-                      onBlur={handleEditSave}
-                      className="h-7 py-1"
-                      autoFocus
-                    />
-                  ) : (
-                    <>
-                      <span className="font-medium">
-                        {player.name}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        States: {player.states.length} | Score: {player.score}
-                      </span>
-                    </>
+                <button
+                  className="flex items-center space-x-3 flex-1"
+                  onClick={() => onPlayerSelect(playerId)}
+                >
+                  <Trophy className="h-4 w-4 text-accent" />
+                  <div className="flex flex-col flex-1">
+                    {editingId === playerId ? (
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        onBlur={handleEditSave}
+                        className="h-7 py-1"
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <span className="font-medium">
+                          {player.name}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          States: {player.states.length} | Score: {player.score}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </button>
+                <div className="flex items-center gap-2">
+                  {editingId !== playerId && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditStart(player)}
+                    >
+                      <Pen className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  )}
+                  {players.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onPlayerRemove(playerId)}
+                      disabled={!canAddPlayer}
+                    >
+                      <X className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                   )}
                 </div>
-              </button>
-              <div className="flex items-center gap-2">
-                {editingId !== player.id && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditStart(player)}
-                  >
-                    <Pen className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                )}
-                {players.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onPlayerRemove(player.id)}
-                    disabled={!canAddPlayer}
-                  >
-                    <X className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </ScrollArea>
     </div>

@@ -42,7 +42,12 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         
         const existingPlayers = await fetchPlayers(existingGameId);
         if (existingPlayers && existingPlayers.length > 0) {
-          setPlayersState(existingPlayers);
+          // Ensure all player IDs are properly formatted as numbers
+          const formattedPlayers = existingPlayers.map(player => ({
+            ...player,
+            id: typeof player.id === 'string' ? parseInt(player.id) : player.id
+          }));
+          setPlayersState(formattedPlayers);
         } else {
           // Create initial player if none exists
           const initialPlayer = await createInitialPlayer(existingGameId);
@@ -93,7 +98,18 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
   };
 
   const setPlayers = (newPlayers: Player[]) => {
-    setPlayersState(newPlayers);
+    // Ensure all player IDs are properly formatted as numbers
+    const formattedPlayers = newPlayers.map(player => {
+      if (typeof player.id === 'object' && player.id !== null && player.id._type === 'Number') {
+        return {
+          ...player,
+          id: parseInt(player.id.value) || 0
+        };
+      }
+      return player;
+    });
+    
+    setPlayersState(formattedPlayers);
   };
 
   return { players, currentGameId, isLoading, setPlayers };

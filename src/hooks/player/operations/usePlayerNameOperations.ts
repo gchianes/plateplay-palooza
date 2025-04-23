@@ -15,6 +15,11 @@ export function usePlayerNameOperations({
   setPlayers
 }: UsePlayerNameOperationsProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
+    // Log the parameters to help diagnose issues
+    console.log(`Attempting to update player name. ID: ${playerId}, New name: ${newName}, Game ID: ${currentGameId}`);
+    console.log(`Player object:`, players.find(p => p.id === playerId));
+    
+    // For mock game or missing game ID, only update locally
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log(`Using mock game ID, updating player ${playerId} name to ${newName} locally`);
       updateLocalPlayerName(playerId, newName);
@@ -22,11 +27,15 @@ export function usePlayerNameOperations({
     }
 
     try {
+      // Convert number ID to string for database query
+      const playerIdString = playerId.toString();
+      console.log(`Updating player name in database. Player ID: ${playerIdString}`);
+      
       const { error } = await supabase
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
-        .eq('id', playerId.toString());
+        .eq('id', playerIdString);
 
       if (error) {
         console.error('Error updating player name:', error);
@@ -50,12 +59,17 @@ export function usePlayerNameOperations({
   };
 
   const updateLocalPlayerName = (playerId: number, newName: string) => {
-    const updatedPlayers = players.map(player => 
-      player.id === playerId 
-        ? { ...player, name: newName }
-        : player
-    );
+    console.log(`Updating local player data. ID: ${playerId}, New name: ${newName}`);
     
+    const updatedPlayers = players.map(player => {
+      // Add a console log to debug the comparison
+      console.log(`Checking player: ${player.id} (${typeof player.id}) against: ${playerId} (${typeof playerId})`);
+      return player.id === playerId 
+        ? { ...player, name: newName }
+        : player;
+    });
+    
+    console.log("Updated players list:", updatedPlayers);
     setPlayers(updatedPlayers);
     toast({
       title: "Name updated",
