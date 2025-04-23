@@ -15,8 +15,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { MapPin } from 'lucide-react';
+import { MapPin, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -27,6 +28,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const { signIn, isLoading } = useAuth();
+  const [error, setError] = React.useState<string | null>(null);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,7 +39,16 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    await signIn(data.email, data.password);
+    setError(null);
+    try {
+      await signIn(data.email, data.password);
+    } catch (err: any) {
+      if (err?.code === 'email_not_confirmed') {
+        setError('Please verify your email address before signing in. Check your inbox for a confirmation link.');
+      } else {
+        setError(err?.message || 'Failed to sign in. Please try again.');
+      }
+    }
   };
 
   return (
@@ -49,6 +60,13 @@ const Login = () => {
       
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
+        
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

@@ -44,44 +44,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error signing in:', error);
+        throw { ...error, code: error.code };
+      }
+      
       navigate('/');
     } catch (error) {
-      console.error('Error signing in:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sign in. Please try again.",
-        duration: 3000,
-      });
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      setIsLoading(true);
+      const { error, data } = await supabase.auth.signUp({
         email,
         password,
       });
       
       if (error) throw error;
-      navigate('/');
-    } catch (error) {
+      
+      if (data?.user && !data.session) {
+        toast({
+          title: "Verification email sent",
+          description: "Please check your email to verify your account before signing in.",
+          duration: 6000,
+        });
+        navigate('/login');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
       console.error('Error signing up:', error);
       toast({
         title: "Error",
-        description: "Failed to create account. Please try again.",
+        description: error?.message || "Failed to create account. Please try again.",
         duration: 3000,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/login');
@@ -92,6 +108,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Failed to sign out. Please try again.",
         duration: 3000,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
