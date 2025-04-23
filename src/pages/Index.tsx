@@ -38,6 +38,7 @@ const Index = () => {
           activePlayer={activePlayer}
           setActivePlayer={setActivePlayer}
           currentGameId={currentGameId}
+          globalSpottedStates={globalSpottedStates}
           setGlobalSpottedStates={setGlobalSpottedStates}
         />
 

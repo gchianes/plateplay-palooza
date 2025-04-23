@@ -10,6 +10,7 @@ interface PlayerManagementProps {
   activePlayer: number;
   setActivePlayer: (id: number) => void;
   currentGameId: string | null;
+  globalSpottedStates: string[];
   setGlobalSpottedStates: (states: string[]) => void;
 }
 
@@ -19,6 +20,7 @@ export function PlayerManagement({
   activePlayer,
   setActivePlayer,
   currentGameId,
+  globalSpottedStates,
   setGlobalSpottedStates
 }: PlayerManagementProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
