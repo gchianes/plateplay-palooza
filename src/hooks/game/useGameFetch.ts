@@ -45,7 +45,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
           // Ensure all player IDs are properly formatted as numbers
           const formattedPlayers = existingPlayers.map(player => ({
             ...player,
-            id: typeof player.id === 'string' ? parseInt(player.id) : player.id
+            id: getNumericId(player.id)
           }));
           setPlayersState(formattedPlayers);
         } else {
@@ -99,36 +99,43 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
 
   // Helper function to safely convert any type of ID to a number
   const getNumericId = (id: any): number => {
+    if (id === null || id === undefined) {
+      return 0;
+    }
+    
     if (typeof id === 'number') {
       return id;
-    } else if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
-      return parseInt(id.value || '0') || 0;
+    } 
+    
+    if (typeof id === 'string') {
+      return parseInt(id) || 0;
     }
+    
+    if (typeof id === 'object') {
+      // Handle object-like IDs that might come from serialization
+      if (id._type === 'Number' && 'value' in id) {
+        return parseInt(String(id.value) || '0') || 0;
+      }
+    }
+    
     return 0;
   };
 
   const setPlayers = (newPlayers: Player[]) => {
+    if (!Array.isArray(newPlayers)) {
+      console.error('setPlayers called with non-array value:', newPlayers);
+      return;
+    }
+    
     // Ensure all player IDs are properly formatted as numbers
     const formattedPlayers = newPlayers.map(player => {
-      if (player === null || player === undefined) {
+      if (!player) {
         return { id: 0, name: "Unknown", states: [], score: 0 };
       }
 
-      // Safely handle potentially null id
-      const id = player.id || 0;
-      
-      // Handle object-like IDs (might come from DB or serialization)
-      if (typeof id === 'object' && id !== null && typeof (id as any)._type === 'string' && (id as any)._type === 'Number') {
-        return {
-          ...player,
-          id: parseInt((id as any).value || '0') || 0
-        };
-      }
-      
-      // Handle any other cases to ensure id is always a number
       return {
         ...player,
-        id: typeof id === 'number' ? id : 0
+        id: getNumericId(player.id)
       };
     });
     
