@@ -15,36 +15,18 @@ export function usePlayerNameOperations({
   setPlayers
 }: UsePlayerNameOperationsProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
-    // Handle mock game ID or missing game ID with local name change
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log(`Using mock game ID, updating player ${playerId} name to ${newName} locally`);
-      
-      // Update the local state with the new player name
-      const updatedPlayers = players.map(player => 
-        player.id === playerId 
-          ? { ...player, name: newName }
-          : player
-      );
-      
-      // Set the updated players array
-      setPlayers(updatedPlayers);
-
-      toast({
-        title: "Name updated",
-        description: "Player name has been changed successfully.",
-        duration: 3000,
-      });
-      
+      updateLocalPlayerName(playerId, newName);
       return;
     }
 
     try {
-      console.log(`Updating player ${playerId} name to ${newName} for game ${currentGameId}`);
       const { error } = await supabase
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
-        .eq('id', playerId.toString()); // Convert number to string here
+        .eq('id', playerId.toString());
 
       if (error) {
         console.error('Error updating player name:', error);
@@ -56,21 +38,7 @@ export function usePlayerNameOperations({
         return;
       }
 
-      // Update local state with the new player name
-      const updatedPlayers = players.map(player => 
-        player.id === playerId 
-          ? { ...player, name: newName }
-          : player
-      );
-      
-      // Set the updated players array
-      setPlayers(updatedPlayers);
-
-      toast({
-        title: "Name updated",
-        description: "Player name has been changed successfully.",
-        duration: 3000,
-      });
+      updateLocalPlayerName(playerId, newName);
     } catch (error) {
       console.error('Error updating player name:', error);
       toast({
@@ -79,6 +47,21 @@ export function usePlayerNameOperations({
         duration: 3000,
       });
     }
+  };
+
+  const updateLocalPlayerName = (playerId: number, newName: string) => {
+    const updatedPlayers = players.map(player => 
+      player.id === playerId 
+        ? { ...player, name: newName }
+        : player
+    );
+    
+    setPlayers(updatedPlayers);
+    toast({
+      title: "Name updated",
+      description: "Player name has been changed successfully.",
+      duration: 3000,
+    });
   };
 
   return {

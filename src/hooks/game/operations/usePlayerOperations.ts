@@ -19,14 +19,12 @@ export const usePlayerOperations = () => {
       }
 
       if (playersData && playersData.length > 0) {
-        const formattedPlayers = playersData.map(p => ({
+        return playersData.map(p => ({
           id: parseInt(p.id),
           name: p.name,
           states: p.states as string[],
           score: p.score
         }));
-        
-        return formattedPlayers;
       }
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -36,7 +34,9 @@ export const usePlayerOperations = () => {
   };
 
   const createInitialPlayer = async (gameId: string) => {
-    if (!gameId) return null;
+    if (!gameId || gameId === "mock-game-id") {
+      return setDefaultPlayer();
+    }
     
     try {
       const { data: newPlayer, error: newPlayerError } = await supabase
@@ -52,39 +52,32 @@ export const usePlayerOperations = () => {
 
       if (newPlayerError) {
         console.error("Error creating initial player:", newPlayerError);
-        throw newPlayerError;
+        return setDefaultPlayer();
       }
 
       if (newPlayer) {
-        const formattedPlayer = {
+        return {
           id: parseInt(newPlayer.id),
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score
         };
-        return formattedPlayer;
       }
     } catch (error) {
       console.error("Error in player creation:", error);
     }
     
-    return null;
+    return setDefaultPlayer();
   };
 
-  const setDefaultPlayer = (setPlayersStateFn?: (players: Player[]) => void) => {
-    console.log("Using mock game ID or no currentGameId, creating local player");
-    const defaultPlayer = {
-      id: 1, // Using a simple integer ID for local player
+  const setDefaultPlayer = () => {
+    console.log("Creating default local player");
+    return {
+      id: 1,
       name: 'Player 1',
       states: [],
       score: 0
     };
-    
-    if (setPlayersStateFn) {
-      setPlayersStateFn([defaultPlayer]);
-    }
-    
-    return defaultPlayer;
   };
 
   return {
