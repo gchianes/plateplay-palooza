@@ -17,9 +17,12 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Create a proper UUID format mock user ID
+  const mockUserId = '00000000-0000-4000-a000-000000000000'; // Valid UUID format
+  
   // Create a proper mock user that satisfies the User type
   const mockUser = {
-    id: 'mock-user-id',
+    id: mockUserId,
     email: 'demo@example.com',
     app_metadata: {},
     user_metadata: {},

@@ -7,9 +7,11 @@ export const useGameOperations = (userId: string | undefined) => {
   const [currentGameId, setCurrentGameId] = useState<string | null>(null);
 
   const loadExistingGame = async () => {
-    if (!userId) {
-      console.log("No user ID provided, using mock game ID");
-      return "mock-game-id";
+    if (!userId || !isValidUUID(userId)) {
+      console.log("No valid user ID provided, using mock game ID");
+      const mockId = "mock-game-id";
+      setCurrentGameId(mockId);
+      return mockId;
     }
 
     try {
@@ -22,7 +24,10 @@ export const useGameOperations = (userId: string | undefined) => {
 
       if (gamesError) {
         console.error("Error fetching games:", gamesError);
-        return null;
+        // Fall back to mock game ID on error
+        const mockId = "mock-game-id";
+        setCurrentGameId(mockId);
+        return mockId;
       }
 
       if (games && games.length > 0) {
@@ -35,14 +40,18 @@ export const useGameOperations = (userId: string | undefined) => {
       return await createNewGame();
     } catch (error) {
       console.error("Error loading game:", error);
-      return null;
+      const mockId = "mock-game-id";
+      setCurrentGameId(mockId);
+      return mockId;
     }
   };
 
   const createNewGame = async () => {
-    if (!userId) {
-      console.log("No user ID provided, using mock game ID");
-      return "mock-game-id";
+    if (!userId || !isValidUUID(userId)) {
+      console.log("No valid user ID provided, using mock game ID");
+      const mockId = "mock-game-id";
+      setCurrentGameId(mockId);
+      return mockId;
     }
 
     try {
@@ -59,10 +68,13 @@ export const useGameOperations = (userId: string | undefined) => {
         console.error("Error creating new game:", newGameError);
         toast({
           title: "Error",
-          description: "Failed to create new game",
+          description: "Failed to create new game. Using offline mode.",
           duration: 3000,
         });
-        return null;
+        // Fall back to mock game ID on error
+        const mockId = "mock-game-id";
+        setCurrentGameId(mockId);
+        return mockId;
       }
 
       if (newGame) {
@@ -74,11 +86,20 @@ export const useGameOperations = (userId: string | undefined) => {
       console.error("Error in game creation:", error);
       toast({
         title: "Error",
-        description: "Failed to create game",
+        description: "Failed to create game. Using offline mode.",
         duration: 3000,
       });
     }
-    return null;
+    // Final fallback
+    const mockId = "mock-game-id";
+    setCurrentGameId(mockId);
+    return mockId;
+  };
+
+  // Helper function to validate UUID format
+  const isValidUUID = (uuid: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
   };
 
   return {

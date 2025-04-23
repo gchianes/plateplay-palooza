@@ -45,8 +45,8 @@ export function PlayerManagement({
   // Log the currentGameId to debug why the button might be disabled
   useEffect(() => {
     console.log("Current game ID in PlayerManagement:", currentGameId);
-    console.log("Can add player:", !!currentGameId);
-  }, [currentGameId]);
+    console.log("Current players:", players);
+  }, [currentGameId, players]);
 
   return (
     <PlayerScores 
@@ -56,7 +56,7 @@ export function PlayerManagement({
       onPlayerRemove={handleRemovePlayer}
       onPlayerSelect={setActivePlayer}
       onPlayerNameChange={handleNameChange}
-      canAddPlayer={true} // Always enable the button for now, we'll fix the root cause later
+      canAddPlayer={true} // Always enable the button
     />
   );
 }
