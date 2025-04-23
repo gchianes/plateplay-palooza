@@ -1,14 +1,13 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
-export const useGameOperations = (userId: string | undefined) => {
+export const useGameOperations = (userId: string | null) => {
   const [currentGameId, setCurrentGameId] = useState<string | null>(null);
 
   const loadExistingGame = async () => {
-    if (!userId || !isValidUUID(userId)) {
-      console.log("No valid user ID provided, using mock game ID");
+    if (!userId) {
+      console.log("No user ID provided, using mock game ID");
       const mockId = "mock-game-id";
       setCurrentGameId(mockId);
       return mockId;
@@ -44,8 +43,8 @@ export const useGameOperations = (userId: string | undefined) => {
   };
 
   const createNewGame = async () => {
-    if (!userId || !isValidUUID(userId)) {
-      console.log("No valid user ID provided, using mock game ID");
+    if (!userId) {
+      console.log("No user ID provided, using mock game ID");
       const mockId = "mock-game-id";
       setCurrentGameId(mockId);
       return mockId;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Player } from '@/types/player';
@@ -16,7 +15,7 @@ interface UseGameFetchReturn {
 export function useGameFetch(user: User | null): UseGameFetchReturn {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [players, setPlayersState] = useState<Player[]>([]);
-  const { currentGameId, loadExistingGame, createNewGame } = useGameOperations(user?.id);
+  const { currentGameId, loadExistingGame, createNewGame } = useGameOperations(user?.id || null);
   const { fetchPlayers, createInitialPlayer, setDefaultPlayer } = usePlayerOperations();
 
   useEffect(() => {
@@ -28,7 +27,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
       setIsLoading(true);
       console.log("Loading or creating game for user:", user?.id || "anonymous");
       
-      // Attempt to load existing game
+      // Attempt to load existing game with explicit user ID
       const existingGameId = await loadExistingGame();
       
       if (existingGameId) {
