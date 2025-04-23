@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState } from '@/hooks/game/useGameState';
 import { PlayerManagement } from '@/components/PlayerManagement';
 import { GameState } from '@/components/GameState';
 import { Skeleton } from '@/components/ui/skeleton';
