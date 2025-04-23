@@ -1,8 +1,7 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import ScoreBoard from '@/components/ScoreBoard';
-import USMap from '@/components/USMap';
+import USAMap from '@/components/USAMap';
 import LicensePlateList from '@/components/LicensePlateList';
 import { states, calculateScore, getProgress, sortStatesBySpotted } from '@/utils/stateData';
 import { toast } from '@/components/ui/use-toast';
@@ -14,6 +13,7 @@ const Index = () => {
   const score = calculateScore(spottedStates);
   const progress = getProgress(spottedStates);
   const sortedStates = sortStatesBySpotted(statesList);
+  const spottedStateIds = spottedStates.map(state => state.id);
 
   const handleToggleState = (stateId: string) => {
     const updatedStates = statesList.map(state => {
@@ -60,21 +60,10 @@ const Index = () => {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
-                <div className="map-container-wrapper">
-                  <div className="usa-map-grid">
-                    {sortedStates.map(state => (
-                      <div 
-                        key={state.id} 
-                        className={`usa-state-block ${state.spotted ? 'spotted' : ''}`}
-                        onClick={() => handleToggleState(state.id)}
-                      >
-                        <div className="state-content">
-                          <span className="state-abbr">{state.abbreviation}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <USAMap 
+                  spottedStates={spottedStateIds}
+                  onStateClick={handleToggleState}
+                />
               </div>
             </div>
           </div>
