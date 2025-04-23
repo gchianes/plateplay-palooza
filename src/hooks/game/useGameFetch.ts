@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Player } from '@/types/player';
@@ -41,17 +42,26 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         
         const existingPlayers = await fetchPlayers(existingGameId);
         if (existingPlayers && existingPlayers.length > 0) {
-          // Ensure all player IDs are properly formatted as numbers
-          const formattedPlayers = existingPlayers.map(player => ({
-            ...player,
-            id: getNumericId(player.id)
+          // Transform players from database to client format
+          const formattedPlayers = existingPlayers.map((player, index) => ({
+            id: index + 1, // Client-side numeric ID
+            name: player.name,
+            states: Array.isArray(player.states) ? player.states : [],
+            score: player.score || 0,
+            databaseId: player.id // Keep the database UUID for server operations
           }));
           setPlayersState(formattedPlayers);
         } else {
           // Create initial player if none exists
           const initialPlayer = await createInitialPlayer(existingGameId);
           if (initialPlayer) {
-            setPlayersState([initialPlayer]);
+            setPlayersState([{
+              id: 1,
+              name: initialPlayer.name,
+              states: Array.isArray(initialPlayer.states) ? initialPlayer.states : [],
+              score: initialPlayer.score || 0,
+              databaseId: initialPlayer.id
+            }]);
           } else {
             setDefaultPlayer(setPlayersState);
           }
@@ -70,7 +80,13 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
           
           const initialPlayer = await createInitialPlayer(newGameId);
           if (initialPlayer) {
-            setPlayersState([initialPlayer]);
+            setPlayersState([{
+              id: 1,
+              name: initialPlayer.name,
+              states: Array.isArray(initialPlayer.states) ? initialPlayer.states : [],
+              score: initialPlayer.score || 0,
+              databaseId: initialPlayer.id
+            }]);
           } else {
             setDefaultPlayer(setPlayersState);
           }
@@ -96,45 +112,26 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
     }
   };
 
-  // Helper function to safely convert any type of ID to a number
-  const getNumericId = (id: any): number => {
-    if (id === null || id === undefined) {
-      return 0;
-    }
-    
-    if (typeof id === 'number') {
-      return id;
-    } 
-    
-    if (typeof id === 'string') {
-      return parseInt(id) || 0;
-    }
-    
-    if (typeof id === 'object') {
-      // Handle object-like IDs that might come from serialization
-      if (id._type === 'Number' && 'value' in id) {
-        return parseInt(String(id.value) || '0') || 0;
-      }
-    }
-    
-    return 0;
-  };
-
+  // Ensure consistent player formatting when setting players
   const setPlayers = (newPlayers: Player[]) => {
     if (!Array.isArray(newPlayers)) {
       console.error('setPlayers called with non-array value:', newPlayers);
       return;
     }
     
-    // Ensure all player IDs are properly formatted as numbers
-    const formattedPlayers = newPlayers.map(player => {
+    // Preserve database IDs when updating players
+    const formattedPlayers = newPlayers.map((player, index) => {
       if (!player) {
-        return { id: 0, name: "Unknown", states: [], score: 0 };
+        return { id: index + 1, name: "Unknown", states: [], score: 0 };
       }
-
+      
+      // Find existing player with same ID to preserve databaseId
+      const existingPlayer = players.find(p => p.id === player.id);
+      
       return {
         ...player,
-        id: getNumericId(player.id)
+        id: player.id || index + 1,
+        databaseId: player.databaseId || (existingPlayer ? existingPlayer.databaseId : undefined)
       };
     });
     

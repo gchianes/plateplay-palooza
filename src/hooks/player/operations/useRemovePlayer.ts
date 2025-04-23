@@ -64,12 +64,27 @@ export function useRemovePlayer({
     }
 
     try {
+      // Find the player in the current players array
+      const playerToRemove = currentPlayers.find(p => p.id === playerId);
+      if (!playerToRemove) {
+        console.error('Player not found:', playerId);
+        toast({
+          title: "Error",
+          description: "Player not found",
+          duration: 3000,
+        });
+        return;
+      }
+      
       console.log("Removing player:", playerId);
+      
+      // In Supabase, we need the database ID which is stored in playerToRemove.databaseId
+      // If we don't have a databaseId, we'll try using the numeric ID as a string
       const { error } = await supabase
         .from('players')
         .delete()
         .eq('game_id', currentGameId)
-        .eq('id', playerId.toString());
+        .eq('id', playerToRemove.databaseId || playerId);
 
       if (error) {
         console.error('Error removing player:', error);
@@ -81,7 +96,6 @@ export function useRemovePlayer({
         return;
       }
 
-      const playerToRemove = currentPlayers.find(p => p.id === playerId);
       if (playerToRemove) {
         const updatedStates = globalSpottedStates.filter(
           stateId => !playerToRemove.states.includes(stateId)
