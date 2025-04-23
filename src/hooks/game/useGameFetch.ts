@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Player } from '@/types/player';
@@ -105,10 +106,10 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
           id: parseInt(player.id.value) || 0
         };
       }
-      // Handle the case where player.id might be null
+      // Handle any case where player.id might not be a valid number
       return {
         ...player,
-        id: player.id !== null ? player.id : 0
+        id: typeof player.id === 'number' ? player.id : 0
       };
     });
     
