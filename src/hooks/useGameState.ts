@@ -11,27 +11,45 @@ export function useGameState(user: User | null): UseGameStateReturn {
   const [activePlayer, setActivePlayer] = useState<number>(0);
   const [globalSpottedStates, setGlobalSpottedStates] = useState<string[]>([]);
   const [currentGameId, setCurrentGameId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const loadOrCreateGame = async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
+      setIsLoading(true);
+      console.log("Loading or creating game for user:", user.id);
+      
       // First try to load an existing game
-      const { data: games } = await supabase
+      const { data: games, error: gamesError } = await supabase
         .from('games')
         .select('*')
-        .eq('user_id', user.id)  // Add filter by user_id to ensure we get the user's games
+        .eq('user_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(1);
+
+      console.log("Games fetched:", games);
+      if (gamesError) {
+        console.error("Error fetching games:", gamesError);
+      }
 
       if (games && games.length > 0) {
         const gameId = games[0].id;
         setCurrentGameId(gameId);
+        console.log("Found existing game with ID:", gameId);
 
-        const { data: playersData } = await supabase
+        const { data: playersData, error: playersError } = await supabase
           .from('players')
           .select('*')
           .eq('game_id', gameId);
+
+        console.log("Players fetched:", playersData);
+        if (playersError) {
+          console.error("Error fetching players:", playersError);
+        }
 
         if (playersData && playersData.length > 0) {
           const formattedPlayers = playersData.map(p => ({
@@ -40,28 +58,65 @@ export function useGameState(user: User | null): UseGameStateReturn {
             states: p.states as string[],
             score: p.score
           }));
+          
+          console.log("Setting players to:", formattedPlayers);
           setPlayers(formattedPlayers);
           setActivePlayer(formattedPlayers[0].id);
           
           const allSpottedStates = formattedPlayers.reduce((acc, player) => 
             [...acc, ...player.states], [] as string[]);
           setGlobalSpottedStates([...new Set(allSpottedStates)]);
+          
+          setIsLoading(false);
+          return;
+        } else {
+          console.log("No players found for game, creating initial player");
+          // Game exists but no players, create an initial player
+          const { data: newPlayer } = await supabase
+            .from('players')
+            .insert({
+              game_id: gameId,
+              name: 'Player 1',
+              states: [],
+              score: 0
+            })
+            .select()
+            .single();
+
+          if (newPlayer) {
+            const formattedPlayer = {
+              id: parseInt(newPlayer.id),
+              name: newPlayer.name,
+              states: newPlayer.states as string[],
+              score: newPlayer.score
+            };
+            setPlayers([formattedPlayer]);
+            setActivePlayer(formattedPlayer.id);
+          }
+          
+          setIsLoading(false);
           return;
         }
       }
 
+      console.log("No existing game found, creating new game");
       // If no game exists, create a new one
-      const { data: newGame } = await supabase
+      const { data: newGame, error: newGameError } = await supabase
         .from('games')
         .insert({ user_id: user.id })
         .select()
         .single();
 
+      if (newGameError) {
+        console.error("Error creating new game:", newGameError);
+      }
+
       if (newGame) {
+        console.log("Created new game with ID:", newGame.id);
         setCurrentGameId(newGame.id);
         
         // Create initial player
-        const { data: newPlayer } = await supabase
+        const { data: newPlayer, error: newPlayerError } = await supabase
           .from('players')
           .insert({
             game_id: newGame.id,
@@ -72,7 +127,12 @@ export function useGameState(user: User | null): UseGameStateReturn {
           .select()
           .single();
 
+        if (newPlayerError) {
+          console.error("Error creating initial player:", newPlayerError);
+        }
+
         if (newPlayer) {
+          console.log("Created initial player:", newPlayer);
           const formattedPlayer = {
             id: parseInt(newPlayer.id),
             name: newPlayer.name,
@@ -90,12 +150,20 @@ export function useGameState(user: User | null): UseGameStateReturn {
         description: "Failed to load or create game",
         duration: 3000,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (user) {
       loadOrCreateGame();
+    } else {
+      setPlayers([]);
+      setActivePlayer(0);
+      setGlobalSpottedStates([]);
+      setCurrentGameId(null);
+      setIsLoading(false);
     }
   }, [user]);
 
@@ -106,6 +174,7 @@ export function useGameState(user: User | null): UseGameStateReturn {
     setActivePlayer,
     globalSpottedStates,
     setGlobalSpottedStates,
-    currentGameId
+    currentGameId,
+    isLoading
   };
 }

@@ -56,8 +56,10 @@ export function PlayerManagement({
   };
 
   const handleAddPlayer = async () => {
-    // Fix: Check if players array exists and its length
-    if (!currentGameId || (players && players.length >= 6)) {
+    if (!currentGameId) return;
+    
+    // Fixed check for maximum players (6)
+    if (players.length >= 6) {
       toast({
         title: "Maximum players reached",
         description: "You can only have up to 6 players in a game.",
@@ -67,31 +69,46 @@ export function PlayerManagement({
     }
 
     try {
-      const { data: newPlayer } = await supabase
+      console.log("Adding new player for game:", currentGameId);
+      const { data: newPlayer, error } = await supabase
         .from('players')
         .insert({
           game_id: currentGameId,
-          name: `Player ${players ? players.length + 1 : 1}`,
+          name: `Player ${players.length + 1}`,
           states: [],
           score: 0
         })
         .select()
         .single();
 
+      if (error) {
+        console.error("Error inserting player:", error);
+        throw error;
+      }
+
       if (newPlayer) {
+        console.log("New player created:", newPlayer);
         const formattedPlayer = {
           id: parseInt(newPlayer.id),
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score
         };
-        // Fix: Handle case where players might be undefined
-        setPlayers(players ? [...players, formattedPlayer] : [formattedPlayer]);
+        
+        const updatedPlayers = [...players, formattedPlayer];
+        console.log("Updated players:", updatedPlayers);
+        setPlayers(updatedPlayers);
         
         // If this is the first player, set it as active
-        if (!players || players.length === 0) {
+        if (players.length === 0) {
           setActivePlayer(formattedPlayer.id);
         }
+        
+        toast({
+          title: "Player added",
+          description: `${formattedPlayer.name} has been added to the game.`,
+          duration: 3000,
+        });
       }
     } catch (error) {
       console.error('Error adding player:', error);
@@ -104,10 +121,19 @@ export function PlayerManagement({
   };
 
   const handleRemovePlayer = async (playerId: number) => {
-    // Fix: Check if players exists and has more than 1 element
-    if (!currentGameId || !players || players.length <= 1) return;
+    if (!currentGameId || players.length <= 1) {
+      if (players.length <= 1) {
+        toast({
+          title: "Cannot remove player",
+          description: "You must have at least one player in the game.",
+          duration: 3000,
+        });
+      }
+      return;
+    }
 
     try {
+      console.log("Removing player:", playerId);
       await supabase
         .from('players')
         .delete()
@@ -123,11 +149,18 @@ export function PlayerManagement({
       }
       
       const updatedPlayers = players.filter(p => p.id !== playerId);
+      console.log("Updated players after removal:", updatedPlayers);
       setPlayers(updatedPlayers);
       
       if (activePlayer === playerId && updatedPlayers.length > 0) {
         setActivePlayer(updatedPlayers[0].id);
       }
+      
+      toast({
+        title: "Player removed",
+        description: "Player has been removed from the game.",
+        duration: 3000,
+      });
     } catch (error) {
       console.error('Error removing player:', error);
       toast({
@@ -140,7 +173,7 @@ export function PlayerManagement({
 
   return (
     <PlayerScores 
-      players={players || []}  // Fix: Provide empty array if players is undefined
+      players={players}
       activePlayer={activePlayer}
       onPlayerAdd={handleAddPlayer}
       onPlayerRemove={handleRemovePlayer}

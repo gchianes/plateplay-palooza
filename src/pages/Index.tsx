@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import { useGameState } from '@/hooks/useGameState';
 import { PlayerManagement } from '@/components/PlayerManagement';
 import { GameState } from '@/components/GameState';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const [isMapVisible, setIsMapVisible] = useState(false);
@@ -19,7 +20,8 @@ const Index = () => {
     setActivePlayer,
     globalSpottedStates,
     setGlobalSpottedStates,
-    currentGameId
+    currentGameId,
+    isLoading
   } = useGameState(user);
 
   if (!user) {
@@ -32,25 +34,34 @@ const Index = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        <PlayerManagement 
-          players={players}
-          setPlayers={setPlayers}
-          activePlayer={activePlayer}
-          setActivePlayer={setActivePlayer}
-          currentGameId={currentGameId}
-          globalSpottedStates={globalSpottedStates}
-          setGlobalSpottedStates={setGlobalSpottedStates}
-        />
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-[200px] w-full rounded-lg" />
+            <Skeleton className="h-[400px] w-full rounded-lg" />
+          </div>
+        ) : (
+          <>
+            <PlayerManagement 
+              players={players}
+              setPlayers={setPlayers}
+              activePlayer={activePlayer}
+              setActivePlayer={setActivePlayer}
+              currentGameId={currentGameId}
+              globalSpottedStates={globalSpottedStates}
+              setGlobalSpottedStates={setGlobalSpottedStates}
+            />
 
-        <GameState 
-          players={players}
-          setPlayers={setPlayers}
-          activePlayer={activePlayer}
-          globalSpottedStates={globalSpottedStates}
-          setGlobalSpottedStates={setGlobalSpottedStates}
-          currentGameId={currentGameId}
-          isMapVisible={isMapVisible}
-        />
+            <GameState 
+              players={players}
+              setPlayers={setPlayers}
+              activePlayer={activePlayer}
+              globalSpottedStates={globalSpottedStates}
+              setGlobalSpottedStates={setGlobalSpottedStates}
+              currentGameId={currentGameId}
+              isMapVisible={isMapVisible}
+            />
+          </>
+        )}
       </main>
     </div>
   );

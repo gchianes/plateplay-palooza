@@ -6,6 +6,7 @@ export interface GameState {
   activePlayer: number;
   globalSpottedStates: string[];
   currentGameId: string | null;
+  isLoading: boolean;
 }
 
 export interface GameStateActions {
