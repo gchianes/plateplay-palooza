@@ -96,6 +96,16 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
     }
   };
 
+  // Helper function to safely convert any type of ID to a number
+  const getNumericId = (id: any): number => {
+    if (typeof id === 'number') {
+      return id;
+    } else if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
+      return parseInt(id.value) || 0;
+    }
+    return 0;
+  };
+
   const setPlayers = (newPlayers: Player[]) => {
     // Ensure all player IDs are properly formatted as numbers
     const formattedPlayers = newPlayers.map(player => {
@@ -109,7 +119,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
       if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
         return {
           ...player,
-          id: parseInt(id.value) || 0
+          id: parseInt(id.value || '0') // Add fallback for value
         };
       }
       
