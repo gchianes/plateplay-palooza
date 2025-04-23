@@ -41,7 +41,7 @@ export function usePlayerNameOperations({
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
-        .eq('id', playerId);
+        .eq('id', playerId.toString()); // Convert number to string here
 
       if (error) {
         console.error('Error updating player name:', error);
