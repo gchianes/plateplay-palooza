@@ -23,17 +23,26 @@ export function useGameState(user: User | null): UseGameStateReturn {
       setIsLoading(true);
       console.log("Loading or creating game for user:", user.id);
       
+      // For development/testing, check if we have a mock user
+      const userId = user.id;
+      if (!userId) {
+        console.error("No valid user ID found");
+        setIsLoading(false);
+        return;
+      }
+
       // First try to load an existing game
       const { data: games, error: gamesError } = await supabase
         .from('games')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('updated_at', { ascending: false })
         .limit(1);
 
       console.log("Games fetched:", games);
       if (gamesError) {
         console.error("Error fetching games:", gamesError);
+        // Continue execution to create a new game
       }
 
       if (games && games.length > 0) {
@@ -71,11 +80,71 @@ export function useGameState(user: User | null): UseGameStateReturn {
           return;
         } else {
           console.log("No players found for game, creating initial player");
-          // Game exists but no players, create an initial player
-          const { data: newPlayer } = await supabase
+          try {
+            // Game exists but no players, create an initial player
+            const { data: newPlayer, error: newPlayerError } = await supabase
+              .from('players')
+              .insert({
+                game_id: gameId,
+                name: 'Player 1',
+                states: [],
+                score: 0
+              })
+              .select()
+              .single();
+
+            if (newPlayerError) {
+              console.error("Error creating initial player:", newPlayerError);
+              throw newPlayerError;
+            }
+
+            if (newPlayer) {
+              const formattedPlayer = {
+                id: parseInt(newPlayer.id),
+                name: newPlayer.name,
+                states: newPlayer.states as string[],
+                score: newPlayer.score
+              };
+              setPlayers([formattedPlayer]);
+              setActivePlayer(formattedPlayer.id);
+            }
+          } catch (error) {
+            console.error("Error in player creation:", error);
+            toast({
+              title: "Error",
+              description: "Failed to create player",
+              duration: 3000,
+            });
+          }
+          
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      console.log("No existing game found, creating new game");
+      try {
+        // If no game exists, create a new one
+        const { data: newGame, error: newGameError } = await supabase
+          .from('games')
+          .insert({ user_id: userId })
+          .select()
+          .single();
+
+        if (newGameError) {
+          console.error("Error creating new game:", newGameError);
+          throw newGameError;
+        }
+
+        if (newGame) {
+          console.log("Created new game with ID:", newGame.id);
+          setCurrentGameId(newGame.id);
+          
+          // Create initial player
+          const { data: newPlayer, error: newPlayerError } = await supabase
             .from('players')
             .insert({
-              game_id: gameId,
+              game_id: newGame.id,
               name: 'Player 1',
               states: [],
               score: 0
@@ -83,7 +152,13 @@ export function useGameState(user: User | null): UseGameStateReturn {
             .select()
             .single();
 
+          if (newPlayerError) {
+            console.error("Error creating initial player:", newPlayerError);
+            throw newPlayerError;
+          }
+
           if (newPlayer) {
+            console.log("Created initial player:", newPlayer);
             const formattedPlayer = {
               id: parseInt(newPlayer.id),
               name: newPlayer.name,
@@ -93,55 +168,14 @@ export function useGameState(user: User | null): UseGameStateReturn {
             setPlayers([formattedPlayer]);
             setActivePlayer(formattedPlayer.id);
           }
-          
-          setIsLoading(false);
-          return;
         }
-      }
-
-      console.log("No existing game found, creating new game");
-      // If no game exists, create a new one
-      const { data: newGame, error: newGameError } = await supabase
-        .from('games')
-        .insert({ user_id: user.id })
-        .select()
-        .single();
-
-      if (newGameError) {
-        console.error("Error creating new game:", newGameError);
-      }
-
-      if (newGame) {
-        console.log("Created new game with ID:", newGame.id);
-        setCurrentGameId(newGame.id);
-        
-        // Create initial player
-        const { data: newPlayer, error: newPlayerError } = await supabase
-          .from('players')
-          .insert({
-            game_id: newGame.id,
-            name: 'Player 1',
-            states: [],
-            score: 0
-          })
-          .select()
-          .single();
-
-        if (newPlayerError) {
-          console.error("Error creating initial player:", newPlayerError);
-        }
-
-        if (newPlayer) {
-          console.log("Created initial player:", newPlayer);
-          const formattedPlayer = {
-            id: parseInt(newPlayer.id),
-            name: newPlayer.name,
-            states: newPlayer.states as string[],
-            score: newPlayer.score
-          };
-          setPlayers([formattedPlayer]);
-          setActivePlayer(formattedPlayer.id);
-        }
+      } catch (error) {
+        console.error("Error in game/player creation:", error);
+        toast({
+          title: "Error",
+          description: "Failed to create game or player",
+          duration: 3000,
+        });
       }
     } catch (error) {
       console.error('Error loading/creating game:', error);

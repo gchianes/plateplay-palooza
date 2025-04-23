@@ -42,7 +42,7 @@ const Index = () => {
         ) : (
           <>
             <PlayerManagement 
-              players={players}
+              players={players || []}
               setPlayers={setPlayers}
               activePlayer={activePlayer}
               setActivePlayer={setActivePlayer}
@@ -52,7 +52,7 @@ const Index = () => {
             />
 
             <GameState 
-              players={players}
+              players={players || []}
               setPlayers={setPlayers}
               activePlayer={activePlayer}
               globalSpottedStates={globalSpottedStates}

@@ -28,11 +28,22 @@ export function PlayerManagement({
     if (!currentGameId) return;
 
     try {
-      await supabase
+      console.log(`Updating player ${playerId} name to ${newName} for game ${currentGameId}`);
+      const { error } = await supabase
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
         .eq('id', playerId.toString());
+
+      if (error) {
+        console.error('Error updating player name:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update player name",
+          duration: 3000,
+        });
+        return;
+      }
 
       setPlayers(players.map(player => 
         player.id === playerId 
@@ -56,10 +67,19 @@ export function PlayerManagement({
   };
 
   const handleAddPlayer = async () => {
-    if (!currentGameId) return;
+    if (!currentGameId) {
+      console.error("No current game ID available");
+      toast({
+        title: "Error",
+        description: "Game not initialized properly",
+        duration: 3000,
+      });
+      return;
+    }
     
     // Fixed check for maximum players (6)
-    if (players.length >= 6) {
+    const currentPlayers = Array.isArray(players) ? players : [];
+    if (currentPlayers.length >= 6) {
       toast({
         title: "Maximum players reached",
         description: "You can only have up to 6 players in a game.",
@@ -74,7 +94,7 @@ export function PlayerManagement({
         .from('players')
         .insert({
           game_id: currentGameId,
-          name: `Player ${players.length + 1}`,
+          name: `Player ${currentPlayers.length + 1}`,
           states: [],
           score: 0
         })
@@ -83,7 +103,12 @@ export function PlayerManagement({
 
       if (error) {
         console.error("Error inserting player:", error);
-        throw error;
+        toast({
+          title: "Error",
+          description: "Failed to add new player: " + error.message,
+          duration: 3000,
+        });
+        return;
       }
 
       if (newPlayer) {
@@ -95,12 +120,12 @@ export function PlayerManagement({
           score: newPlayer.score
         };
         
-        const updatedPlayers = [...players, formattedPlayer];
+        const updatedPlayers = [...currentPlayers, formattedPlayer];
         console.log("Updated players:", updatedPlayers);
         setPlayers(updatedPlayers);
         
         // If this is the first player, set it as active
-        if (players.length === 0) {
+        if (currentPlayers.length === 0) {
           setActivePlayer(formattedPlayer.id);
         }
         
@@ -121,26 +146,39 @@ export function PlayerManagement({
   };
 
   const handleRemovePlayer = async (playerId: number) => {
-    if (!currentGameId || players.length <= 1) {
-      if (players.length <= 1) {
-        toast({
-          title: "Cannot remove player",
-          description: "You must have at least one player in the game.",
-          duration: 3000,
-        });
-      }
+    if (!currentGameId) {
+      return;
+    }
+    
+    const currentPlayers = Array.isArray(players) ? players : [];
+    if (currentPlayers.length <= 1) {
+      toast({
+        title: "Cannot remove player",
+        description: "You must have at least one player in the game.",
+        duration: 3000,
+      });
       return;
     }
 
     try {
       console.log("Removing player:", playerId);
-      await supabase
+      const { error } = await supabase
         .from('players')
         .delete()
         .eq('game_id', currentGameId)
         .eq('id', playerId.toString());
 
-      const playerToRemove = players.find(p => p.id === playerId);
+      if (error) {
+        console.error('Error removing player:', error);
+        toast({
+          title: "Error",
+          description: "Failed to remove player: " + error.message,
+          duration: 3000,
+        });
+        return;
+      }
+
+      const playerToRemove = currentPlayers.find(p => p.id === playerId);
       if (playerToRemove) {
         const updatedStates = globalSpottedStates.filter(
           stateId => !playerToRemove.states.includes(stateId)
@@ -148,7 +186,7 @@ export function PlayerManagement({
         setGlobalSpottedStates(updatedStates);
       }
       
-      const updatedPlayers = players.filter(p => p.id !== playerId);
+      const updatedPlayers = currentPlayers.filter(p => p.id !== playerId);
       console.log("Updated players after removal:", updatedPlayers);
       setPlayers(updatedPlayers);
       
@@ -173,7 +211,7 @@ export function PlayerManagement({
 
   return (
     <PlayerScores 
-      players={players}
+      players={Array.isArray(players) ? players : []}
       activePlayer={activePlayer}
       onPlayerAdd={handleAddPlayer}
       onPlayerRemove={handleRemovePlayer}
