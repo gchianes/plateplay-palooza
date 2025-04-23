@@ -16,11 +16,11 @@ const Index = () => {
   const progress = getProgress(spottedStates);
   const sortedStates = sortStatesBySpotted(statesList);
 
-  // Ensure the map has time to properly initialize
+  // Ensure the map has time to properly initialize with a longer delay
   useEffect(() => {
     const timer = setTimeout(() => {
       setMapReady(true);
-    }, 100);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -53,31 +53,37 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Header />
       
-      <main className="container mx-auto px-4 pb-12">
-        <div className="flex flex-col md:flex-row md:space-x-6">
-          <div className="w-full md:w-7/12 mb-6 md:mb-0">
-            <ScoreBoard 
-              spottedStates={spottedStates} 
-              totalStates={states.length} 
-              progress={progress} 
-              score={score} 
-            />
-            
+      <main className="container mx-auto px-4 py-8">
+        <ScoreBoard 
+          spottedStates={spottedStates} 
+          totalStates={states.length} 
+          progress={progress} 
+          score={score} 
+        />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
+          <div className="lg:col-span-8 space-y-6">
             {mapReady && (
-              <div className="border rounded-lg shadow-sm p-4 bg-white mt-4">
-                <h2 className="text-xl font-bold mb-3">United States Map</h2>
-                <USMap 
-                  states={statesList} 
-                  onToggleState={handleToggleState} 
-                />
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">United States Map</h2>
+                  <div className="relative aspect-[4/3] w-full">
+                    <div className="absolute inset-0">
+                      <USMap 
+                        states={statesList} 
+                        onToggleState={handleToggleState} 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
           
-          <div className="w-full md:w-5/12">
+          <div className="lg:col-span-4">
             <LicensePlateList 
               states={sortedStates} 
               onToggleState={handleToggleState} 
