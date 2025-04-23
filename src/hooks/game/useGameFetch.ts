@@ -100,13 +100,15 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
   const setPlayers = (newPlayers: Player[]) => {
     // Ensure all player IDs are properly formatted as numbers
     const formattedPlayers = newPlayers.map(player => {
+      // Handle object-like IDs (might come from DB or serialization)
       if (typeof player.id === 'object' && player.id !== null && player.id._type === 'Number') {
         return {
           ...player,
           id: parseInt(player.id.value) || 0
         };
       }
-      // Handle any case where player.id might not be a valid number
+      
+      // Handle any other cases to ensure id is always a number
       return {
         ...player,
         id: typeof player.id === 'number' ? player.id : 0

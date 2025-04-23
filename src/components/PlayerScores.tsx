@@ -32,8 +32,11 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   const handleEditStart = (player: Player) => {
     console.log("Starting edit for player:", player);
     // Ensure the player.id is valid before setting it as the editingId
-    if (typeof player.id === 'number') {
-      setEditingId(player.id);
+    if (typeof player.id === 'number' || (typeof player.id === 'object' && player.id !== null)) {
+      const numericId = typeof player.id === 'object' && player.id !== null 
+        ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
+        : player.id;
+      setEditingId(numericId);
       setEditName(player.name);
     }
   };
@@ -64,7 +67,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Players</h2>
-        {players.length < 6 && (
+        {players.length < 6 && canAddPlayer && (
           <Button 
             variant="outline" 
             size="sm"
