@@ -2,27 +2,35 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { User } from '@supabase/supabase-js';
 
 export const useGameOperations = (userId: string | undefined) => {
   const [currentGameId, setCurrentGameId] = useState<string | null>(null);
 
   const loadExistingGame = async () => {
-    const { data: games, error: gamesError } = await supabase
-      .from('games')
-      .select('*')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(1);
-
-    if (gamesError) {
-      console.error("Error fetching games:", gamesError);
+    if (!userId || userId === 'mock-user-id') {
+      console.log("Using mock user ID or no user ID, skipping database operations");
       return null;
     }
 
-    if (games && games.length > 0) {
-      setCurrentGameId(games[0].id);
-      return games[0].id;
+    try {
+      const { data: games, error: gamesError } = await supabase
+        .from('games')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      if (gamesError) {
+        console.error("Error fetching games:", gamesError);
+        return null;
+      }
+
+      if (games && games.length > 0) {
+        setCurrentGameId(games[0].id);
+        return games[0].id;
+      }
+    } catch (error) {
+      console.error("Error loading game:", error);
     }
     
     return null;
@@ -30,7 +38,10 @@ export const useGameOperations = (userId: string | undefined) => {
 
   const createNewGame = async () => {
     try {
-      if (!userId) return null;
+      if (!userId || userId === 'mock-user-id') {
+        console.log("Using mock user ID or no user ID, skipping database operations");
+        return null;
+      }
 
       console.log("No existing game found, creating new game");
       const { data: newGame, error: newGameError } = await supabase

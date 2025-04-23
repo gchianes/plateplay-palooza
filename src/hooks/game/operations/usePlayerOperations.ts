@@ -1,36 +1,43 @@
 
-import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
 
 export const usePlayerOperations = () => {
   const fetchPlayers = async (gameId: string) => {
-    const { data: playersData, error: playersError } = await supabase
-      .from('players')
-      .select('*')
-      .eq('game_id', gameId);
+    if (!gameId) return null;
+    
+    try {
+      const { data: playersData, error: playersError } = await supabase
+        .from('players')
+        .select('*')
+        .eq('game_id', gameId);
 
-    if (playersError) {
-      console.error("Error fetching players:", playersError);
-      return null;
-    }
+      if (playersError) {
+        console.error("Error fetching players:", playersError);
+        return null;
+      }
 
-    if (playersData && playersData.length > 0) {
-      const formattedPlayers = playersData.map(p => ({
-        id: parseInt(p.id),
-        name: p.name,
-        states: p.states as string[],
-        score: p.score
-      }));
-      
-      return formattedPlayers;
+      if (playersData && playersData.length > 0) {
+        const formattedPlayers = playersData.map(p => ({
+          id: parseInt(p.id),
+          name: p.name,
+          states: p.states as string[],
+          score: p.score
+        }));
+        
+        return formattedPlayers;
+      }
+    } catch (error) {
+      console.error("Error fetching players:", error);
     }
     
     return null;
   };
 
   const createInitialPlayer = async (gameId: string) => {
+    if (!gameId) return null;
+    
     try {
       const { data: newPlayer, error: newPlayerError } = await supabase
         .from('players')
@@ -59,12 +66,8 @@ export const usePlayerOperations = () => {
       }
     } catch (error) {
       console.error("Error in player creation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create player",
-        duration: 3000,
-      });
     }
+    
     return null;
   };
 

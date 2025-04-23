@@ -24,10 +24,11 @@ export function useGameState(user: User | null): UseGameStateReturn {
   };
 
   useEffect(() => {
-    if (players.length > 0 && activePlayer === 0) {
+    // Make sure we have an active player selected
+    if (players.length > 0 && (activePlayer === 0 || !players.find(p => p.id === activePlayer))) {
       setActivePlayer(players[0].id);
     }
-  }, [players]);
+  }, [players, activePlayer]);
 
   return {
     players,

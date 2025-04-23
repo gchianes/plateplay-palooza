@@ -4,6 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { Player } from '@/types/player';
 import { useGameOperations } from './operations/useGameOperations';
 import { usePlayerOperations } from './operations/usePlayerOperations';
+import { toast } from '@/components/ui/use-toast';
 
 interface UseGameFetchReturn {
   players: Player[];
@@ -37,13 +38,15 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
       setIsLoading(true);
       console.log("Loading or creating game for user:", user.id);
       
+      // Attempt to load existing game
       const existingGameId = await loadExistingGame();
       
       if (existingGameId) {
         const existingPlayers = await fetchPlayers(existingGameId);
-        if (existingPlayers) {
+        if (existingPlayers && existingPlayers.length > 0) {
           setPlayersState(existingPlayers);
         } else {
+          // Create initial player if none exists
           const initialPlayer = await createInitialPlayer(existingGameId);
           if (initialPlayer) {
             setPlayersState([initialPlayer]);
@@ -52,6 +55,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
           }
         }
       } else {
+        // Create new game if none exists
         const newGameId = await createNewGame();
         if (newGameId) {
           const initialPlayer = await createInitialPlayer(newGameId);
@@ -62,11 +66,21 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
           }
         } else {
           setDefaultPlayer(setPlayersState);
+          toast({
+            title: "Error",
+            description: "Could not initialize game. Please try again.",
+            duration: 3000,
+          });
         }
       }
     } catch (error) {
       console.error('Error loading/creating game:', error);
       setDefaultPlayer(setPlayersState);
+      toast({
+        title: "Error",
+        description: "There was a problem initializing your game. Using offline mode.",
+        duration: 3000,
+      });
     } finally {
       setIsLoading(false);
     }

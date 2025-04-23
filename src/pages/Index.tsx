@@ -7,6 +7,7 @@ import { useGameState } from '@/hooks/game/useGameState';
 import { PlayerManagement } from '@/components/PlayerManagement';
 import { GameState } from '@/components/GameState';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [isMapVisible, setIsMapVisible] = useState(true);
@@ -24,12 +25,14 @@ const Index = () => {
     isLoading
   } = useGameState(user);
 
+  // Redirect to login if no user
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
 
+  // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-100">
