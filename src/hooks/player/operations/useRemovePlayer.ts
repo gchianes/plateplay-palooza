@@ -23,23 +23,43 @@ export function useRemovePlayer({
   setGlobalSpottedStates
 }: UseRemovePlayerProps) {
   const handleRemovePlayer = async (playerId: number) => {
-    if (!currentGameId) {
-      console.error("No current game ID available for removing player");
-      toast({
-        title: "Error",
-        description: "Game not initialized properly",
-        duration: 3000,
-      });
-      return;
-    }
-    
+    // Always ensure players is an array
     const currentPlayers = Array.isArray(players) ? players : [];
+    
     if (currentPlayers.length <= 1) {
       toast({
         title: "Cannot remove player",
         description: "You must have at least one player in the game.",
         duration: 3000,
       });
+      return;
+    }
+
+    // Handle mock game ID or missing game ID with local player removal
+    if (!currentGameId || currentGameId === "mock-game-id") {
+      console.log("Using mock game ID, removing player locally");
+      
+      const playerToRemove = currentPlayers.find(p => p.id === playerId);
+      if (playerToRemove) {
+        const updatedStates = globalSpottedStates.filter(
+          stateId => !playerToRemove.states.includes(stateId)
+        );
+        setGlobalSpottedStates(updatedStates);
+      }
+      
+      const updatedPlayers = currentPlayers.filter(p => p.id !== playerId);
+      setPlayers(updatedPlayers);
+      
+      if (activePlayer === playerId && updatedPlayers.length > 0) {
+        setActivePlayer(updatedPlayers[0].id);
+      }
+      
+      toast({
+        title: "Player removed",
+        description: "Player has been removed from the game.",
+        duration: 3000,
+      });
+      
       return;
     }
 

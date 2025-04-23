@@ -20,28 +20,25 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
   const { fetchPlayers, createInitialPlayer, setDefaultPlayer } = usePlayerOperations();
 
   useEffect(() => {
-    if (user) {
-      loadOrCreateGame();
-    } else {
-      setDefaultPlayer(setPlayersState);
-      setIsLoading(false);
-    }
+    loadOrCreateGame();
   }, [user]);
 
   const loadOrCreateGame = async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
       setIsLoading(true);
-      console.log("Loading or creating game for user:", user.id);
+      console.log("Loading or creating game for user:", user?.id || "anonymous");
       
       // Attempt to load existing game
       const existingGameId = await loadExistingGame();
       
       if (existingGameId) {
+        // For mock game ID, create local players
+        if (existingGameId === "mock-game-id") {
+          setDefaultPlayer(setPlayersState);
+          setIsLoading(false);
+          return;
+        }
+        
         const existingPlayers = await fetchPlayers(existingGameId);
         if (existingPlayers && existingPlayers.length > 0) {
           setPlayersState(existingPlayers);
@@ -58,6 +55,13 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         // Create new game if none exists
         const newGameId = await createNewGame();
         if (newGameId) {
+          // For mock game ID, create local players
+          if (newGameId === "mock-game-id") {
+            setDefaultPlayer(setPlayersState);
+            setIsLoading(false);
+            return;
+          }
+          
           const initialPlayer = await createInitialPlayer(newGameId);
           if (initialPlayer) {
             setPlayersState([initialPlayer]);
@@ -68,7 +72,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
           setDefaultPlayer(setPlayersState);
           toast({
             title: "Error",
-            description: "Could not initialize game. Please try again.",
+            description: "Could not initialize game. Using offline mode.",
             duration: 3000,
           });
         }

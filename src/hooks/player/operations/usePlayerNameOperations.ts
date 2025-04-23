@@ -15,13 +15,22 @@ export function usePlayerNameOperations({
   setPlayers
 }: UsePlayerNameOperationsProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
-    if (!currentGameId) {
-      console.error("No current game ID available for name change");
+    // Handle mock game ID or missing game ID with local name change
+    if (!currentGameId || currentGameId === "mock-game-id") {
+      console.log(`Using mock game ID, updating player ${playerId} name to ${newName} locally`);
+      
+      setPlayers(players.map(player => 
+        player.id === playerId 
+          ? { ...player, name: newName }
+          : player
+      ));
+
       toast({
-        title: "Error",
-        description: "Game not initialized properly",
+        title: "Name updated",
+        description: "Player name has been changed successfully.",
         duration: 3000,
       });
+      
       return;
     }
 

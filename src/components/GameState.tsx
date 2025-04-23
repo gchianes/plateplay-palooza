@@ -28,14 +28,12 @@ export function GameState({
   isMapVisible
 }: GameStateProps) {
   const handleToggleState = async (stateId: string) => {
-    if (!currentGameId || globalSpottedStates.includes(stateId)) {
-      if (globalSpottedStates.includes(stateId)) {
-        toast({
-          title: "State already spotted",
-          description: "This state has already been spotted by another player.",
-          duration: 3000,
-        });
-      }
+    if (globalSpottedStates.includes(stateId)) {
+      toast({
+        title: "State already spotted",
+        description: "This state has already been spotted by another player.",
+        duration: 3000,
+      });
       return;
     }
 
@@ -47,15 +45,18 @@ export function GameState({
       const newStates = hasState 
         ? currentPlayer.states.filter(id => id !== stateId)
         : [...currentPlayer.states, stateId];
-
-      await supabase
-        .from('players')
-        .update({
-          states: newStates,
-          score: newStates.length
-        })
-        .eq('game_id', currentGameId)
-        .eq('id', activePlayer.toString());
+      
+      // Handle database update for non-mock games
+      if (currentGameId && currentGameId !== "mock-game-id") {
+        await supabase
+          .from('players')
+          .update({
+            states: newStates,
+            score: newStates.length
+          })
+          .eq('game_id', currentGameId)
+          .eq('id', activePlayer.toString());
+      }
 
       if (!hasState) {
         setGlobalSpottedStates([...globalSpottedStates, stateId]);

@@ -17,23 +17,48 @@ export function useAddPlayer({
   setActivePlayer
 }: UseAddPlayerProps) {
   const handleAddPlayer = async () => {
-    if (!currentGameId) {
-      console.error("No current game ID available for adding player");
-      toast({
-        title: "Error",
-        description: "Game not initialized properly",
-        duration: 3000,
-      });
-      return;
-    }
-    
+    // Always ensure players is an array
     const currentPlayers = Array.isArray(players) ? players : [];
+    
+    // Check for maximum players
     if (currentPlayers.length >= 6) {
       toast({
         title: "Maximum players reached",
         description: "You can only have up to 6 players in a game.",
         duration: 3000,
       });
+      return;
+    }
+
+    // Handle mock game ID or missing game ID with local player creation
+    if (!currentGameId || currentGameId === "mock-game-id") {
+      console.log("Using mock game ID or no currentGameId, creating local player");
+      
+      // Find the highest ID in the current players to avoid duplicate IDs
+      const highestId = currentPlayers.reduce((max, player) => 
+        player.id > max ? player.id : max, 0);
+      
+      const newPlayerId = highestId + 1;
+      const newPlayer = {
+        id: newPlayerId,
+        name: `Player ${currentPlayers.length + 1}`,
+        states: [],
+        score: 0
+      };
+      
+      const updatedPlayers = [...currentPlayers, newPlayer];
+      setPlayers(updatedPlayers);
+      
+      if (currentPlayers.length === 0) {
+        setActivePlayer(newPlayer.id);
+      }
+      
+      toast({
+        title: "Player added",
+        description: `${newPlayer.name} has been added to the game.`,
+        duration: 3000,
+      });
+      
       return;
     }
 
