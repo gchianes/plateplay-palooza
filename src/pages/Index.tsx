@@ -5,7 +5,7 @@ import ScoreBoard from '@/components/ScoreBoard';
 import USAMap from '@/components/USAMap';
 import LicensePlateList from '@/components/LicensePlateList';
 import PlayerScores from '@/components/PlayerScores';
-import { states, calculateScore, getProgress, sortStatesBySpotted } from '@/utils/stateData';
+import { states } from '@/utils/stateData';
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
 
@@ -15,14 +15,17 @@ const Index = () => {
     { id: 1, name: "Player 1", states: [], score: 0 }
   ]);
   const [activePlayer, setActivePlayer] = useState(1);
+  const [globalSpottedStates, setGlobalSpottedStates] = useState<string[]>([]);
   
   const currentPlayer = players.find(p => p.id === activePlayer) || players[0];
   const spottedStates = currentPlayer.states;
   const score = currentPlayer.score;
   const progress = (spottedStates.length / states.length) * 100;
+
+  // Sort states, but now considering globally spotted states
   const sortedStates = states.map(state => ({
     ...state,
-    spotted: spottedStates.includes(state.id)
+    spotted: globalSpottedStates.includes(state.id)
   })).sort((a, b) => {
     if (a.spotted && !b.spotted) return -1;
     if (!a.spotted && b.spotted) return 1;
@@ -50,6 +53,15 @@ const Index = () => {
 
   const handleRemovePlayer = (playerId: number) => {
     if (players.length <= 1) return;
+    
+    // Remove player's spotted states from the global list
+    const playerToRemove = players.find(p => p.id === playerId);
+    if (playerToRemove) {
+      setGlobalSpottedStates(prev => 
+        prev.filter(stateId => !playerToRemove.states.includes(stateId))
+      );
+    }
+    
     setPlayers(players.filter(p => p.id !== playerId));
     if (activePlayer === playerId) {
       setActivePlayer(players[0].id);
@@ -57,6 +69,16 @@ const Index = () => {
   };
 
   const handleToggleState = (stateId: string) => {
+    // If the state is already globally spotted, prevent toggling
+    if (globalSpottedStates.includes(stateId)) {
+      toast({
+        title: "State already spotted",
+        description: "This state has already been spotted by another player.",
+        duration: 3000,
+      });
+      return;
+    }
+
     setPlayers(players.map(player => {
       if (player.id !== activePlayer) return player;
 
@@ -65,14 +87,16 @@ const Index = () => {
         ? player.states.filter(id => id !== stateId)
         : [...player.states, stateId];
       
-      // Show toast notification
+      // Update global spotted states
       if (!hasState) {
+        setGlobalSpottedStates(prev => [...prev, stateId]);
         toast({
           title: `License plate spotted!`,
           description: `${currentPlayer.name} spotted ${states.find(s => s.id === stateId)?.name}`,
           duration: 3000,
         });
       } else {
+        setGlobalSpottedStates(prev => prev.filter(id => id !== stateId));
         toast({
           title: `Removed from spotted list`,
           description: `${states.find(s => s.id === stateId)?.name} removed from ${currentPlayer.name}'s collection`,
@@ -116,7 +140,7 @@ const Index = () => {
                 <div className="p-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
                   <USAMap 
-                    spottedStates={spottedStates}
+                    spottedStates={globalSpottedStates}
                     onStateClick={handleToggleState}
                   />
                 </div>
