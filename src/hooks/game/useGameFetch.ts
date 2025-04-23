@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Player } from '@/types/player';
@@ -101,7 +102,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
     if (typeof id === 'number') {
       return id;
     } else if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
-      return parseInt(id.value) || 0;
+      return parseInt(id.value || '0') || 0;
     }
     return 0;
   };
@@ -113,13 +114,14 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         return { id: 0, name: "Unknown", states: [], score: 0 };
       }
 
-      const id = player.id;
+      // Safely handle potentially null id
+      const id = player.id || 0;
       
       // Handle object-like IDs (might come from DB or serialization)
-      if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
+      if (typeof id === 'object' && id !== null && typeof (id as any)._type === 'string' && (id as any)._type === 'Number') {
         return {
           ...player,
-          id: parseInt(id.value || '0') // Add fallback for value
+          id: parseInt((id as any).value || '0') || 0
         };
       }
       
