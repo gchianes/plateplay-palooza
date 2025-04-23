@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import ScoreBoard from '@/components/ScoreBoard';
@@ -8,6 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [statesList, setStatesList] = useState(states);
+  const [isMapVisible, setIsMapVisible] = useState(false);
   
   const spottedStates = statesList.filter(state => state.spotted);
   const score = calculateScore(spottedStates);
@@ -56,17 +58,19 @@ const Index = () => {
         />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
-                <USAMap 
-                  spottedStates={spottedStateIds}
-                  onStateClick={handleToggleState}
-                />
+          {isMapVisible && (
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
+                  <USAMap 
+                    spottedStates={spottedStateIds}
+                    onStateClick={handleToggleState}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
           
           <div className="lg:col-span-1">
             <LicensePlateList 
@@ -81,3 +85,4 @@ const Index = () => {
 };
 
 export default Index;
+
