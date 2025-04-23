@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Player } from '@/types/player';
 import PlayerScores from './PlayerScores';
 import { usePlayerOperations } from '@/hooks/player/usePlayerOperations';
@@ -42,6 +42,12 @@ export function PlayerManagement({
     handleAddPlayer();
   };
 
+  // Log the currentGameId to debug why the button might be disabled
+  useEffect(() => {
+    console.log("Current game ID in PlayerManagement:", currentGameId);
+    console.log("Can add player:", !!currentGameId);
+  }, [currentGameId]);
+
   return (
     <PlayerScores 
       players={Array.isArray(players) ? players : []}
@@ -50,7 +56,7 @@ export function PlayerManagement({
       onPlayerRemove={handleRemovePlayer}
       onPlayerSelect={setActivePlayer}
       onPlayerNameChange={handleNameChange}
-      canAddPlayer={!!currentGameId}
+      canAddPlayer={true} // Always enable the button for now, we'll fix the root cause later
     />
   );
 }

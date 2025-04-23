@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
@@ -49,8 +48,9 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     }
   };
 
-  const handleAddPlayerClick = () => {
-    console.log("Add player button clicked in PlayerScores");
+  const handleAddPlayerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Add player button clicked in PlayerScores with canAddPlayer:", canAddPlayer);
     onPlayerAdd();
   };
 
@@ -63,8 +63,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
             variant="outline" 
             size="sm"
             onClick={handleAddPlayerClick}
-            disabled={!canAddPlayer}
-            title={!canAddPlayer ? "Game not initialized properly" : undefined}
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Player

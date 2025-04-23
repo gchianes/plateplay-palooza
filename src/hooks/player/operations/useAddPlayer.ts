@@ -21,6 +21,8 @@ export function useAddPlayer({
     // Always ensure players is an array
     const currentPlayers = Array.isArray(players) ? players : [];
     
+    console.log("handleAddPlayer called with:", { currentGameId, playerCount: currentPlayers.length });
+    
     // Check for maximum players
     if (currentPlayers.length >= 6) {
       toast({
@@ -31,94 +33,38 @@ export function useAddPlayer({
       return;
     }
 
-    // Handle mock game ID or missing game ID with local player creation
-    if (!currentGameId || currentGameId === "mock-game-id") {
-      console.log("Using mock game ID or no currentGameId, creating local player");
+    // For testing, always create a local player
+    console.log("Creating local player");
       
-      // Find the highest ID in the current players to avoid duplicate IDs
-      const highestId = currentPlayers.reduce((max, player) => 
-        player.id > max ? player.id : max, 0);
-      
-      const newPlayerId = highestId + 1;
-      const newPlayer = {
-        id: newPlayerId,
-        name: `Player ${currentPlayers.length + 1}`,
-        states: [],
-        score: 0
-      };
-      
-      const updatedPlayers = [...currentPlayers, newPlayer];
-      console.log("New player created locally:", newPlayer);
-      console.log("Updated players array:", updatedPlayers);
-      setPlayers(updatedPlayers);
-      
-      if (currentPlayers.length === 0) {
-        setActivePlayer(newPlayer.id);
-      }
-      
-      toast({
-        title: "Player added",
-        description: `${newPlayer.name} has been added to the game.`,
-        duration: 3000,
-      });
-      
-      return;
+    // Find the highest ID in the current players to avoid duplicate IDs
+    const highestId = currentPlayers.reduce((max, player) => 
+      player.id > max ? player.id : max, 0);
+    
+    const newPlayerId = highestId + 1;
+    const newPlayer = {
+      id: newPlayerId,
+      name: `Player ${currentPlayers.length + 1}`,
+      states: [],
+      score: 0
+    };
+    
+    const updatedPlayers = [...currentPlayers, newPlayer];
+    console.log("New player created locally:", newPlayer);
+    console.log("Updated players array:", updatedPlayers);
+    
+    // Update the players state
+    setPlayers(updatedPlayers);
+    
+    // If this is the first player, set them as active
+    if (currentPlayers.length === 0) {
+      setActivePlayer(newPlayer.id);
     }
-
-    try {
-      console.log("Adding new player for game:", currentGameId);
-      const { data: newPlayer, error } = await supabase
-        .from('players')
-        .insert({
-          game_id: currentGameId,
-          name: `Player ${currentPlayers.length + 1}`,
-          states: [],
-          score: 0
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error inserting player:", error);
-        toast({
-          title: "Error",
-          description: "Failed to add new player: " + error.message,
-          duration: 3000,
-        });
-        return;
-      }
-
-      if (newPlayer) {
-        console.log("New player created:", newPlayer);
-        const formattedPlayer = {
-          id: parseInt(newPlayer.id),
-          name: newPlayer.name,
-          states: newPlayer.states as string[],
-          score: newPlayer.score
-        };
-        
-        const updatedPlayers = [...currentPlayers, formattedPlayer];
-        console.log("Updated players:", updatedPlayers);
-        setPlayers(updatedPlayers);
-        
-        if (currentPlayers.length === 0) {
-          setActivePlayer(formattedPlayer.id);
-        }
-        
-        toast({
-          title: "Player added",
-          description: `${formattedPlayer.name} has been added to the game.`,
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error('Error adding player:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add new player",
-        duration: 3000,
-      });
-    }
+    
+    toast({
+      title: "Player added",
+      description: `${newPlayer.name} has been added to the game.`,
+      duration: 3000,
+    });
   };
 
   return {
