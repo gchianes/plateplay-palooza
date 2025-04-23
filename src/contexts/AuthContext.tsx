@@ -17,11 +17,32 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Temporary mock user for bypassing authentication
+  // Create a proper mock user that satisfies the User type
   const mockUser = {
     id: 'mock-user-id',
     email: 'demo@example.com',
-    email_verified: true,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
+    role: '',
+    email_confirmed_at: new Date().toISOString(),
+    phone_confirmed_at: null,
+    last_sign_in_at: new Date().toISOString(),
+    confirmed_at: new Date().toISOString(),
+    email_change_sent_at: null,
+    new_email: null,
+    invited_at: null,
+    action_link: null,
+    phone: null,
+    recovery_sent_at: null,
+    identities: [],
+    factors: [],
+    updated_at: new Date().toISOString(),
+    banned_until: null,
+    confirmation_sent_at: null,
+    has_active_subscription: false,
+    deleted_at: null,
   } as User;
 
   const [user, setUser] = useState<User | null>(mockUser);
