@@ -19,6 +19,7 @@ export function usePlayerNameOperations({
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log(`Using mock game ID, updating player ${playerId} name to ${newName} locally`);
       
+      // Update the local state with the new player name
       setPlayers(players.map(player => 
         player.id === playerId 
           ? { ...player, name: newName }
@@ -40,7 +41,7 @@ export function usePlayerNameOperations({
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
-        .eq('id', playerId.toString());
+        .eq('id', playerId);
 
       if (error) {
         console.error('Error updating player name:', error);
@@ -52,6 +53,7 @@ export function usePlayerNameOperations({
         return;
       }
 
+      // Update local state with the new player name
       setPlayers(players.map(player => 
         player.id === playerId 
           ? { ...player, name: newName }
