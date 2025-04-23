@@ -4,45 +4,88 @@ import Header from '@/components/Header';
 import ScoreBoard from '@/components/ScoreBoard';
 import USAMap from '@/components/USAMap';
 import LicensePlateList from '@/components/LicensePlateList';
+import PlayerScores from '@/components/PlayerScores';
 import { states, calculateScore, getProgress, sortStatesBySpotted } from '@/utils/stateData';
 import { toast } from '@/components/ui/use-toast';
+import { Player } from '@/types/player';
 
 const Index = () => {
-  const [statesList, setStatesList] = useState(states);
   const [isMapVisible, setIsMapVisible] = useState(false);
+  const [players, setPlayers] = useState<Player[]>([
+    { id: 1, name: "Player 1", states: [], score: 0 }
+  ]);
+  const [activePlayer, setActivePlayer] = useState(1);
   
-  const spottedStates = statesList.filter(state => state.spotted);
-  const score = calculateScore(spottedStates);
-  const progress = getProgress(spottedStates);
-  const sortedStates = sortStatesBySpotted(statesList);
-  const spottedStateIds = spottedStates.map(state => state.id);
+  const currentPlayer = players.find(p => p.id === activePlayer) || players[0];
+  const spottedStates = currentPlayer.states;
+  const score = currentPlayer.score;
+  const progress = (spottedStates.length / states.length) * 100;
+  const sortedStates = states.map(state => ({
+    ...state,
+    spotted: spottedStates.includes(state.id)
+  })).sort((a, b) => {
+    if (a.spotted && !b.spotted) return -1;
+    if (!a.spotted && b.spotted) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const handleAddPlayer = () => {
+    if (players.length >= 6) {
+      toast({
+        title: "Maximum players reached",
+        description: "You can only have up to 6 players in a game.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    const newPlayerId = Math.max(...players.map(p => p.id)) + 1;
+    setPlayers([...players, {
+      id: newPlayerId,
+      name: `Player ${newPlayerId}`,
+      states: [],
+      score: 0
+    }]);
+  };
+
+  const handleRemovePlayer = (playerId: number) => {
+    if (players.length <= 1) return;
+    setPlayers(players.filter(p => p.id !== playerId));
+    if (activePlayer === playerId) {
+      setActivePlayer(players[0].id);
+    }
+  };
 
   const handleToggleState = (stateId: string) => {
-    const updatedStates = statesList.map(state => {
-      if (state.id === stateId) {
-        const newSpottedValue = !state.spotted;
-        
-        // Show toast notification
-        if (newSpottedValue) {
-          toast({
-            title: `License plate spotted!`,
-            description: `You've spotted ${state.name}`,
-            duration: 3000,
-          });
-        } else {
-          toast({
-            title: `Removed from spotted list`,
-            description: `${state.name} removed from your collection`,
-            duration: 3000,
-          });
-        }
-        
-        return { ...state, spotted: newSpottedValue };
+    setPlayers(players.map(player => {
+      if (player.id !== activePlayer) return player;
+
+      const hasState = player.states.includes(stateId);
+      const newStates = hasState 
+        ? player.states.filter(id => id !== stateId)
+        : [...player.states, stateId];
+      
+      // Show toast notification
+      if (!hasState) {
+        toast({
+          title: `License plate spotted!`,
+          description: `${currentPlayer.name} spotted ${states.find(s => s.id === stateId)?.name}`,
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: `Removed from spotted list`,
+          description: `${states.find(s => s.id === stateId)?.name} removed from ${currentPlayer.name}'s collection`,
+          duration: 3000,
+        });
       }
-      return state;
-    });
-    
-    setStatesList(updatedStates);
+
+      return {
+        ...player,
+        states: newStates,
+        score: newStates.length
+      };
+    }));
   };
 
   return (
@@ -50,11 +93,20 @@ const Index = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
+        <PlayerScores 
+          players={players}
+          activePlayer={activePlayer}
+          onPlayerAdd={handleAddPlayer}
+          onPlayerRemove={handleRemovePlayer}
+          onPlayerSelect={setActivePlayer}
+        />
+
         <ScoreBoard 
-          spottedStates={spottedStates} 
+          spottedStates={spottedStates.length} 
           totalStates={states.length} 
           progress={progress} 
-          score={score} 
+          score={score}
+          playerName={currentPlayer.name}
         />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
@@ -64,7 +116,7 @@ const Index = () => {
                 <div className="p-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
                   <USAMap 
-                    spottedStates={spottedStateIds}
+                    spottedStates={spottedStates}
                     onStateClick={handleToggleState}
                   />
                 </div>
@@ -85,4 +137,3 @@ const Index = () => {
 };
 
 export default Index;
-
