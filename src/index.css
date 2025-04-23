@@ -90,38 +90,71 @@
   @apply bg-accent text-black border-accent-foreground;
 }
 
-.map-container path {
-  @apply fill-gray-300 stroke-gray-600 stroke-1 transition-colors duration-300;
-}
-
-.map-container path.spotted {
-  @apply fill-accent;
-}
-
-.map-container path:hover {
-  @apply fill-primary/30 cursor-pointer;
-}
-
-.map-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.map-container svg {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-}
-
+/* New block-based map styles */
 .map-container-wrapper {
-  position: relative;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  background: #f8f9fa;
   border-radius: 8px;
-  overflow: hidden;
-  background: #fcfcfc;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
 }
 
+.usa-map-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  padding: 12px;
+}
+
+.usa-state-block {
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #495057;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.usa-state-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #dee2e6;
+}
+
+.usa-state-block.spotted {
+  background-color: #ffc107;
+  border-color: #e0a800;
+  color: #212529;
+}
+
+.state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.state-abbr {
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .usa-map-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .usa-map-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
