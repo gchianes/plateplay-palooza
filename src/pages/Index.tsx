@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +32,6 @@ const Index = () => {
     if (!user) return;
 
     try {
-      // Try to load the most recent game
       const { data: games } = await supabase
         .from('games')
         .select('*')
@@ -44,7 +42,6 @@ const Index = () => {
         const gameId = games[0].id;
         setCurrentGameId(gameId);
 
-        // Load players for this game
         const { data: players } = await supabase
           .from('players')
           .select('*')
@@ -66,7 +63,6 @@ const Index = () => {
         }
       }
 
-      // If no existing game, create a new one
       const { data: newGame } = await supabase
         .from('games')
         .insert({ user_id: user.id })
@@ -115,7 +111,7 @@ const Index = () => {
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
-        .eq('id', playerId);
+        .eq('id', playerId.toString());
 
       setPlayers(players.map(player => 
         player.id === playerId 
@@ -187,7 +183,7 @@ const Index = () => {
         .from('players')
         .delete()
         .eq('game_id', currentGameId)
-        .eq('id', playerId);
+        .eq('id', playerId.toString());
 
       const playerToRemove = players.find(p => p.id === playerId);
       if (playerToRemove) {
@@ -240,8 +236,8 @@ const Index = () => {
           score: newStates.length
         })
         .eq('game_id', currentGameId)
-        .eq('id', activePlayer);
-      
+        .eq('id', activePlayer.toString());
+
       if (!hasState) {
         setGlobalSpottedStates(prev => [...prev, stateId]);
         toast({
