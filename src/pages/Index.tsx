@@ -1,26 +1,28 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import ScoreBoard from '@/components/ScoreBoard';
 import USMap from '@/components/USMap';
 import LicensePlateList from '@/components/LicensePlateList';
 import { states, calculateScore, getProgress, sortStatesBySpotted } from '@/utils/stateData';
 import { toast } from '@/components/ui/use-toast';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const Index = () => {
   const [statesList, setStatesList] = useState(states);
   const [mapReady, setMapReady] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   
   const spottedStates = statesList.filter(state => state.spotted);
   const score = calculateScore(spottedStates);
   const progress = getProgress(spottedStates);
   const sortedStates = sortStatesBySpotted(statesList);
 
-  // Ensure the map has time to properly initialize with a longer delay
+  // Ensure the map has time to properly initialize with proper sizing
   useEffect(() => {
     const timer = setTimeout(() => {
       setMapReady(true);
-    }, 500);
+    }, 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -53,7 +55,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-100">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
@@ -64,26 +66,42 @@ const Index = () => {
           score={score} 
         />
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
-          <div className="lg:col-span-8 space-y-6">
-            {mapReady && (
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-800 mb-4">United States Map</h2>
-                  <div className="relative aspect-[4/3] w-full">
-                    <div className="absolute inset-0">
-                      <USMap 
-                        states={statesList} 
-                        onToggleState={handleToggleState} 
-                      />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
+                
+                {mapReady ? (
+                  <div 
+                    ref={mapContainerRef}
+                    className="map-container-wrapper"
+                    style={{ 
+                      minHeight: '500px',
+                      maxHeight: '70vh'
+                    }}
+                  >
+                    <AspectRatio ratio={16 / 10} className="bg-white mb-2">
+                      <div className="w-full h-full p-4">
+                        <USMap 
+                          states={statesList} 
+                          onToggleState={handleToggleState} 
+                        />
+                      </div>
+                    </AspectRatio>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="animate-pulse text-gray-500">
+                      Loading map...
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
           
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-1">
             <LicensePlateList 
               states={sortedStates} 
               onToggleState={handleToggleState} 
