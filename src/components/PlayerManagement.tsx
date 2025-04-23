@@ -37,11 +37,16 @@ export function PlayerManagement({
     setGlobalSpottedStates
   });
 
+  const safeHandleAddPlayer = () => {
+    console.log("Add player button clicked, current players:", players);
+    handleAddPlayer();
+  };
+
   return (
     <PlayerScores 
       players={Array.isArray(players) ? players : []}
       activePlayer={activePlayer}
-      onPlayerAdd={handleAddPlayer}
+      onPlayerAdd={safeHandleAddPlayer}
       onPlayerRemove={handleRemovePlayer}
       onPlayerSelect={setActivePlayer}
       onPlayerNameChange={handleNameChange}

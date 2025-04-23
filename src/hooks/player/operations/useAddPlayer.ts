@@ -8,6 +8,7 @@ interface UseAddPlayerProps {
   players: Player[];
   setPlayers: (players: Player[]) => void;
   setActivePlayer: (id: number) => void;
+  globalSpottedStates: string[];
 }
 
 export function useAddPlayer({
@@ -47,6 +48,8 @@ export function useAddPlayer({
       };
       
       const updatedPlayers = [...currentPlayers, newPlayer];
+      console.log("New player created locally:", newPlayer);
+      console.log("Updated players array:", updatedPlayers);
       setPlayers(updatedPlayers);
       
       if (currentPlayers.length === 0) {

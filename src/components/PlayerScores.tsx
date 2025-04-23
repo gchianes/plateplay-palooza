@@ -49,6 +49,11 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     }
   };
 
+  const handleAddPlayerClick = () => {
+    console.log("Add player button clicked in PlayerScores");
+    onPlayerAdd();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -57,7 +62,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={onPlayerAdd}
+            onClick={handleAddPlayerClick}
             disabled={!canAddPlayer}
             title={!canAddPlayer ? "Game not initialized properly" : undefined}
           >
