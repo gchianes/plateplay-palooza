@@ -72,8 +72,9 @@ export const usePlayerOperations = () => {
   };
 
   const setDefaultPlayer = (setPlayersStateFn?: (players: Player[]) => void) => {
+    console.log("Using mock game ID or no currentGameId, creating local player");
     const defaultPlayer = {
-      id: 0,
+      id: 1, // Using a simple integer ID for local player
       name: 'Player 1',
       states: [],
       score: 0

@@ -20,11 +20,14 @@ export function usePlayerNameOperations({
       console.log(`Using mock game ID, updating player ${playerId} name to ${newName} locally`);
       
       // Update the local state with the new player name
-      setPlayers(players.map(player => 
+      const updatedPlayers = players.map(player => 
         player.id === playerId 
           ? { ...player, name: newName }
           : player
-      ));
+      );
+      
+      // Set the updated players array
+      setPlayers(updatedPlayers);
 
       toast({
         title: "Name updated",
@@ -54,11 +57,14 @@ export function usePlayerNameOperations({
       }
 
       // Update local state with the new player name
-      setPlayers(players.map(player => 
+      const updatedPlayers = players.map(player => 
         player.id === playerId 
           ? { ...player, name: newName }
           : player
-      ));
+      );
+      
+      // Set the updated players array
+      setPlayers(updatedPlayers);
 
       toast({
         title: "Name updated",

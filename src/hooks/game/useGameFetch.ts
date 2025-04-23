@@ -34,6 +34,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
       if (existingGameId) {
         // For mock game ID, create local players
         if (existingGameId === "mock-game-id") {
+          console.log("Using mock game ID, creating local player");
           setDefaultPlayer(setPlayersState);
           setIsLoading(false);
           return;
@@ -57,6 +58,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         if (newGameId) {
           // For mock game ID, create local players
           if (newGameId === "mock-game-id") {
+            console.log("Using mock game ID, creating local player");
             setDefaultPlayer(setPlayersState);
             setIsLoading(false);
             return;

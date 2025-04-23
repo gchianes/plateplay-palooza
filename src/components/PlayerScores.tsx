@@ -35,7 +35,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   };
 
   const handleEditSave = () => {
-    if (editingId && editName.trim()) {
+    if (editingId !== null && editName.trim()) {
       onPlayerNameChange(editingId, editName.trim());
       setEditingId(null);
     }
