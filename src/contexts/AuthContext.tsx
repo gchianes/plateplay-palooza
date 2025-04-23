@@ -17,135 +17,43 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // Temporary mock user for bypassing authentication
+  const mockUser = {
+    id: 'mock-user-id',
+    email: 'demo@example.com',
+    email_verified: true,
+  } as User;
+
+  const [user, setUser] = useState<User | null>(mockUser);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting session:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to retrieve session',
-            variant: 'destructive',
-          });
-        }
-        
-        setSession(data?.session ?? null);
-        setUser(data?.session?.user ?? null);
-      } catch (err) {
-        console.error('Exception in getInitialSession:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getInitialSession();
-
-    try {
-      // Set up auth subscription
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setIsLoading(false);
-        }
-      );
-
-      return () => {
-        if (authListener?.subscription?.unsubscribe) {
-          authListener.subscription.unsubscribe();
-        }
-      };
-    } catch (err) {
-      console.error('Exception in auth subscription:', err);
-      setIsLoading(false);
-      return () => {};
-    }
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: 'Welcome back!',
-        description: 'You have been successfully signed in.',
-      });
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: 'Sign in failed',
-        description: error.message || 'An error occurred during sign in',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  // Modify existing methods to be no-ops or return immediately
+  const signIn = async () => {
+    setUser(mockUser);
+    navigate('/');
   };
 
-  const signUp = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signUp({ email, password });
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: 'Account created',
-        description: 'Check your email for the confirmation link.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Sign up failed',
-        description: error.message || 'An error occurred during sign up',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const signUp = async () => {
+    setUser(mockUser);
+    navigate('/');
   };
 
   const signOut = async () => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: 'Signed out',
-        description: 'You have been successfully signed out.',
-      });
-      navigate('/login');
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: 'Failed to sign out: ' + (error.message || 'Unknown error'),
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    setUser(null);
+    navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user: mockUser, 
+      session: null, 
+      isLoading: false, 
+      signIn, 
+      signUp, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );
