@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import ScoreBoard from '@/components/ScoreBoard';
@@ -22,7 +21,19 @@ const Index = () => {
   const score = currentPlayer.score;
   const progress = (spottedStates.length / states.length) * 100;
 
-  // Sort states, but now considering globally spotted states
+  const handleNameChange = (playerId: number, newName: string) => {
+    setPlayers(players.map(player => 
+      player.id === playerId 
+        ? { ...player, name: newName }
+        : player
+    ));
+    toast({
+      title: "Name updated",
+      description: "Player name has been changed successfully.",
+      duration: 3000,
+    });
+  };
+
   const sortedStates = states.map(state => ({
     ...state,
     spotted: globalSpottedStates.includes(state.id)
@@ -54,7 +65,6 @@ const Index = () => {
   const handleRemovePlayer = (playerId: number) => {
     if (players.length <= 1) return;
     
-    // Remove player's spotted states from the global list
     const playerToRemove = players.find(p => p.id === playerId);
     if (playerToRemove) {
       setGlobalSpottedStates(prev => 
@@ -69,7 +79,6 @@ const Index = () => {
   };
 
   const handleToggleState = (stateId: string) => {
-    // If the state is already globally spotted, prevent toggling
     if (globalSpottedStates.includes(stateId)) {
       toast({
         title: "State already spotted",
@@ -87,7 +96,6 @@ const Index = () => {
         ? player.states.filter(id => id !== stateId)
         : [...player.states, stateId];
       
-      // Update global spotted states
       if (!hasState) {
         setGlobalSpottedStates(prev => [...prev, stateId]);
         toast({
@@ -123,6 +131,7 @@ const Index = () => {
           onPlayerAdd={handleAddPlayer}
           onPlayerRemove={handleRemovePlayer}
           onPlayerSelect={setActivePlayer}
+          onPlayerNameChange={handleNameChange}
         />
 
         <ScoreBoard 

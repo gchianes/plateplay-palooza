@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, UserPlus, X } from 'lucide-react';
+import { Trophy, UserPlus, X, Pen } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface PlayerScoresProps {
   players: Player[];
@@ -12,6 +13,7 @@ interface PlayerScoresProps {
   onPlayerAdd: () => void;
   onPlayerRemove: (id: number) => void;
   onPlayerSelect: (id: number) => void;
+  onPlayerNameChange: (id: number, name: string) => void;
 }
 
 const PlayerScores: React.FC<PlayerScoresProps> = ({
@@ -20,7 +22,31 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   onPlayerAdd,
   onPlayerRemove,
   onPlayerSelect,
+  onPlayerNameChange,
 }) => {
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+
+  const handleEditStart = (player: Player) => {
+    setEditingId(player.id);
+    setEditName(player.name);
+  };
+
+  const handleEditSave = () => {
+    if (editingId && editName.trim()) {
+      onPlayerNameChange(editingId, editName.trim());
+      setEditingId(null);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleEditSave();
+    } else if (e.key === 'Escape') {
+      setEditingId(null);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -52,24 +78,48 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                 onClick={() => onPlayerSelect(player.id)}
               >
                 <Trophy className="h-4 w-4 text-accent" />
-                <div className="flex flex-col">
-                  <span className="font-medium">
-                    {player.name}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    States: {player.states.length} | Score: {player.score}
-                  </span>
+                <div className="flex flex-col flex-1">
+                  {editingId === player.id ? (
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      onKeyDown={handleKeyPress}
+                      onBlur={handleEditSave}
+                      className="h-7 py-1"
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      <span className="font-medium">
+                        {player.name}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        States: {player.states.length} | Score: {player.score}
+                      </span>
+                    </>
+                  )}
                 </div>
               </button>
-              {players.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onPlayerRemove(player.id)}
-                >
-                  <X className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {editingId !== player.id && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditStart(player)}
+                  >
+                    <Pen className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                )}
+                {players.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onPlayerRemove(player.id)}
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>
