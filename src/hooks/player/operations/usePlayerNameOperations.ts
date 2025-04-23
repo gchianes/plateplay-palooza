@@ -17,7 +17,15 @@ export function usePlayerNameOperations({
   const handleNameChange = async (playerId: number, newName: string) => {
     // Log the parameters to help diagnose issues
     console.log(`Attempting to update player name. ID: ${playerId}, New name: ${newName}, Game ID: ${currentGameId}`);
-    console.log(`Player object:`, players.find(p => p.id === playerId));
+    console.log(`Player object:`, players.find(p => {
+      // Safely compare player ids regardless of their format
+      const id = p.id;
+      const numericId = typeof id === 'object' && id !== null && id._type === 'Number'
+        ? parseInt(id.value) || 0
+        : (typeof id === 'number' ? id : 0);
+      
+      return numericId === playerId;
+    }));
     
     // For mock game or missing game ID, only update locally
     if (!currentGameId || currentGameId === "mock-game-id") {
@@ -63,13 +71,15 @@ export function usePlayerNameOperations({
     
     const updatedPlayers = players.map(player => {
       // Add a console log to debug the comparison
-      console.log(`Checking player: ${typeof player.id === 'number' ? player.id : 'invalid'} against: ${playerId}`);
+      const id = player.id;
       
-      // Ensure we're comparing numbers
-      const currentId = typeof player.id === 'object' && player.id !== null 
-        ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
-        : (typeof player.id === 'number' ? player.id : 0);
+      // Safely compare player ids regardless of their format
+      const currentId = typeof id === 'object' && id !== null && id._type === 'Number'
+        ? parseInt(id.value) || 0
+        : (typeof id === 'number' ? id : 0);
         
+      console.log(`Checking player: ${currentId} against: ${playerId}`);
+      
       return currentId === playerId 
         ? { ...player, name: newName }
         : player;

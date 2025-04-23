@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Player } from '@/types/player';
@@ -100,18 +99,20 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
   const setPlayers = (newPlayers: Player[]) => {
     // Ensure all player IDs are properly formatted as numbers
     const formattedPlayers = newPlayers.map(player => {
+      const id = player.id;
+      
       // Handle object-like IDs (might come from DB or serialization)
-      if (typeof player.id === 'object' && player.id !== null && player.id._type === 'Number') {
+      if (typeof id === 'object' && id !== null && id._type === 'Number') {
         return {
           ...player,
-          id: parseInt(player.id.value) || 0
+          id: parseInt(id.value) || 0
         };
       }
       
       // Handle any other cases to ensure id is always a number
       return {
         ...player,
-        id: typeof player.id === 'number' ? player.id : 0
+        id: typeof id === 'number' ? id : 0
       };
     });
     

@@ -31,14 +31,21 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 
   const handleEditStart = (player: Player) => {
     console.log("Starting edit for player:", player);
-    // Ensure the player.id is valid before setting it as the editingId
-    if (typeof player.id === 'number' || (typeof player.id === 'object' && player.id !== null)) {
-      const numericId = typeof player.id === 'object' && player.id !== null 
-        ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
-        : player.id;
-      setEditingId(numericId);
-      setEditName(player.name);
+    
+    // Safely handle player.id regardless of its type
+    const id = player.id;
+    
+    // Handle different possible id formats
+    let playerId = 0;
+    
+    if (typeof id === 'number') {
+      playerId = id;
+    } else if (typeof id === 'object' && id !== null && id._type === 'Number') {
+      playerId = parseInt(id.value) || 0;
     }
+    
+    setEditingId(playerId);
+    setEditName(player.name);
   };
 
   const handleEditSave = () => {
@@ -82,11 +89,16 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
       <ScrollArea className="h-[200px]">
         <div className="space-y-2">
           {players.map((player) => {
-            // Ensure player.id is a valid number
-            const playerId = typeof player.id === 'object' && player.id !== null 
-              ? (player.id._type === 'Number' ? parseInt(player.id.value) : 0)
-              : (typeof player.id === 'number' ? player.id : 0);
-
+            // Safely extract player ID regardless of its type
+            const id = player.id;
+            let playerId = 0;
+            
+            if (typeof id === 'number') {
+              playerId = id;
+            } else if (typeof id === 'object' && id !== null && id._type === 'Number') {
+              playerId = parseInt(id.value) || 0;
+            }
+            
             console.log(`Rendering player: ${player.name}, ID: ${playerId}, Type: ${typeof playerId}`);
                   
             return (
