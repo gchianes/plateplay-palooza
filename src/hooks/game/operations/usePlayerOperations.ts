@@ -8,6 +8,8 @@ export const usePlayerOperations = () => {
     if (!gameId) return null;
     
     try {
+      console.log("Fetching players for game ID:", gameId);
+      
       const { data: playersData, error: playersError } = await supabase
         .from('players')
         .select('*')
@@ -19,6 +21,8 @@ export const usePlayerOperations = () => {
       }
 
       if (playersData && playersData.length > 0) {
+        console.log("Player data from database:", playersData);
+        
         return playersData.map(p => ({
           id: p.player_number,
           name: p.name,
@@ -40,6 +44,8 @@ export const usePlayerOperations = () => {
     }
     
     try {
+      console.log("Creating initial player for game ID:", gameId);
+      
       const { data: newPlayer, error: newPlayerError } = await supabase
         .from('players')
         .insert({
@@ -58,6 +64,8 @@ export const usePlayerOperations = () => {
       }
 
       if (newPlayer) {
+        console.log("Created initial player in database:", newPlayer);
+        
         return {
           id: newPlayer.player_number,
           name: newPlayer.name,

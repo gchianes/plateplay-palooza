@@ -31,6 +31,8 @@ export function usePlayerOperations(props: UsePlayerOperationsProps) {
           throw new Error("Cannot update player states: Player not found or missing database ID");
         }
 
+        console.log(`Updating states for player with client ID ${playerId} and database ID ${playerToUpdate.databaseId}`);
+
         const { error } = await supabase
           .from('players')
           .update({ states })

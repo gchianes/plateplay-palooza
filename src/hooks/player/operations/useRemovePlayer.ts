@@ -65,6 +65,8 @@ export function useRemovePlayer({
         return;
       }
 
+      console.log(`Removing player from database with database ID: ${playerToRemove.databaseId}`);
+
       // Use the database UUID directly
       const { error } = await supabase
         .from('players')

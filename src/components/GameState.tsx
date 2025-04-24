@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Player } from '@/types/player';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +48,8 @@ export function GameState({
       
       // Handle database update for non-mock games
       if (currentGameId && currentGameId !== "mock-game-id" && currentPlayer.databaseId) {
+        console.log(`Updating state for player with client ID ${activePlayer} and database ID ${currentPlayer.databaseId}`);
+        
         await supabase
           .from('players')
           .update({
