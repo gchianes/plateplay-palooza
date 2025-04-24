@@ -48,7 +48,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
             name: player.name,
             states: Array.isArray(player.states) ? player.states : [],
             score: player.score || 0,
-            databaseId: player.id // Store the UUID directly
+            databaseId: player.id // This is already a string UUID from the database
           }));
           setPlayersState(formattedPlayers);
         } else {
@@ -60,7 +60,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
               name: initialPlayer.name,
               states: Array.isArray(initialPlayer.states) ? initialPlayer.states : [],
               score: initialPlayer.score || 0,
-              databaseId: initialPlayer.id // Store the UUID directly
+              databaseId: initialPlayer.id // This is already a string UUID from the database
             }]);
           } else {
             setDefaultPlayer(setPlayersState);
@@ -85,7 +85,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
               name: initialPlayer.name,
               states: Array.isArray(initialPlayer.states) ? initialPlayer.states : [],
               score: initialPlayer.score || 0,
-              databaseId: initialPlayer.id // Store the UUID directly
+              databaseId: initialPlayer.id // This is already a string UUID from the database
             }]);
           } else {
             setDefaultPlayer(setPlayersState);
