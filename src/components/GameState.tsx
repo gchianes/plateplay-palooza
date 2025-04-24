@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Player } from '@/types/player';
 import { usePlayerOperations } from '@/hooks/game/operations/usePlayerOperations';
@@ -125,7 +126,7 @@ export function GameState({
   return (
     <>
       <ScoreBoard 
-        spottedStates={spottedStates}
+        spottedStates={spottedStates} 
         totalStates={states.length} 
         progress={progress} 
         score={score}

@@ -4,13 +4,15 @@ import { Trophy, Flag } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { states } from '@/utils/stateData';
+import { Player } from '@/types/player';
 
 interface ScoreBoardProps {
-  spottedStates: number;
+  spottedStates: string[];
   totalStates: number;
   progress: number;
   score: number;
   playerName: string;
+  currentPlayer: Player;
 }
 
 const ScoreBoard: React.FC<ScoreBoardProps> = ({ 
@@ -18,11 +20,10 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
   totalStates, 
   progress, 
   score,
-  playerName
+  playerName,
+  currentPlayer
 }) => {
-  const currentPlayer = players.find(p => p.id === activePlayer);
-  const spottedStatesList = currentPlayer?.states || [];
-  const spottedStateNames = spottedStatesList
+  const spottedStateNames = spottedStates
     .map(stateId => states.find(s => s.id === stateId)?.name)
     .filter(name => name) // Remove undefined values
     .sort();
@@ -41,7 +42,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
         
         <div className="flex flex-col items-center justify-center p-2">
           <Flag className="h-10 w-10 text-secondary mb-2" />
-          <h2 className="text-2xl font-bold">{spottedStates} / {totalStates}</h2>
+          <h2 className="text-2xl font-bold">{spottedStates.length} / {totalStates}</h2>
           <p className="text-sm text-muted-foreground">States Spotted</p>
         </div>
         
