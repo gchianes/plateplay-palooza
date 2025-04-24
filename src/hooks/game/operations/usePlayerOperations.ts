@@ -60,7 +60,8 @@ export const usePlayerOperations = () => {
           id: newPlayer.id, // Keep as string UUID
           name: newPlayer.name,
           states: newPlayer.states as string[],
-          score: newPlayer.score
+          score: newPlayer.score,
+          databaseId: newPlayer.databaseId
         };
       }
     } catch (error) {
