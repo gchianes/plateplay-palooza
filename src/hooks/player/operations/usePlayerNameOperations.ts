@@ -48,7 +48,8 @@ export function usePlayerNameOperations({
     }
 
     try {
-      console.log(`Updating player name in database. Database ID: ${playerToUpdate.databaseId}, New name: ${newName}`);
+      // Log the exact UUID we're using for the database operation
+      console.log(`Updating player name in database using UUID: "${playerToUpdate.databaseId}" (type: ${typeof playerToUpdate.databaseId})`);
       
       // Use the database UUID, not the client-side numeric ID
       const { error } = await supabase

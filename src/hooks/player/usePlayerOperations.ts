@@ -31,12 +31,15 @@ export function usePlayerOperations(props: UsePlayerOperationsProps) {
           throw new Error("Cannot update player states: Player not found or missing database ID");
         }
 
-        console.log(`Updating states for player with client ID ${playerId} and database ID ${playerToUpdate.databaseId}`);
+        // Log the exact UUID we're using
+        console.log(`Updating states for player with client ID ${playerId} using database UUID: "${playerToUpdate.databaseId}" (type: ${typeof playerToUpdate.databaseId})`);
 
         const { error } = await supabase
           .from('players')
-          .update({ states })
-          .eq('game_id', props.currentGameId)
+          .update({ 
+            states: states,
+            score: states.length 
+          })
           .eq('id', playerToUpdate.databaseId);
 
         if (error) {

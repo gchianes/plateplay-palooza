@@ -44,12 +44,14 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         if (existingPlayers && existingPlayers.length > 0) {
           // Transform players from database to client format
           const formattedPlayers = existingPlayers.map((player, index) => ({
-            id: index + 1, // Client-side numeric ID
+            id: player.player_number, // Client-side numeric ID
             name: player.name,
             states: Array.isArray(player.states) ? player.states : [],
             score: player.score || 0,
-            databaseId: player.id.toString() // Ensure databaseId is always a string
+            databaseId: player.databaseId // Store the actual database UUID
           }));
+          
+          console.log("Formatted players from database with proper databaseId:", formattedPlayers);
           setPlayersState(formattedPlayers);
         } else {
           // Create initial player if none exists
@@ -60,7 +62,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
               name: initialPlayer.name,
               states: Array.isArray(initialPlayer.states) ? initialPlayer.states : [],
               score: initialPlayer.score || 0,
-              databaseId: initialPlayer.id ? initialPlayer.id.toString() : undefined // Ensure databaseId is a string
+              databaseId: initialPlayer.databaseId
             }]);
           } else {
             setDefaultPlayer(setPlayersState);
@@ -85,7 +87,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
               name: initialPlayer.name,
               states: Array.isArray(initialPlayer.states) ? initialPlayer.states : [],
               score: initialPlayer.score || 0,
-              databaseId: initialPlayer.id ? initialPlayer.id.toString() : undefined // Ensure databaseId is a string
+              databaseId: initialPlayer.databaseId
             }]);
           } else {
             setDefaultPlayer(setPlayersState);
@@ -135,6 +137,7 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
       };
     });
     
+    console.log("Setting players with preserved databaseIds:", formattedPlayers);
     setPlayersState(formattedPlayers);
   };
 
