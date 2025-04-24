@@ -23,7 +23,8 @@ export const usePlayerOperations = () => {
           id: p.id, // Keep the UUID as is, don't convert to number
           name: p.name,
           states: p.states as string[],
-          score: p.score
+          score: p.score,
+          databaseId: p.databaseId
         }));
       }
     } catch (error) {
