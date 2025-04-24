@@ -23,7 +23,8 @@ export const usePlayerOperations = () => {
       if (playersData && playersData.length > 0) {
         console.log("Player data from database:", playersData);
         
-        return playersData.map(p => ({
+        // Convert Supabase response to our Player type, ensuring ID mapping is correct
+        return playersData.map((p, index) => ({
           id: p.player_number,
           name: p.name,
           states: p.states as string[],

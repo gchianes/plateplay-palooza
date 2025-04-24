@@ -43,13 +43,16 @@ export function useGameFetch(user: User | null): UseGameFetchReturn {
         const existingPlayers = await fetchPlayers(existingGameId);
         if (existingPlayers && existingPlayers.length > 0) {
           // Transform players from database to client format
-          const formattedPlayers = existingPlayers.map((player, index) => ({
-            id: player.player_number, // Client-side numeric ID
-            name: player.name,
-            states: Array.isArray(player.states) ? player.states : [],
-            score: player.score || 0,
-            databaseId: player.databaseId // Store the actual database UUID
-          }));
+          const formattedPlayers = existingPlayers.map((player) => {
+            // Access the player_number property correctly from the database result
+            return {
+              id: player.id || 0, // Use client-side ID or default to 0
+              name: player.name,
+              states: Array.isArray(player.states) ? player.states : [],
+              score: player.score || 0,
+              databaseId: player.databaseId // Store the actual database UUID
+            };
+          });
           
           console.log("Formatted players from database with proper databaseId:", formattedPlayers);
           setPlayersState(formattedPlayers);
