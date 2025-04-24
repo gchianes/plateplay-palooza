@@ -24,7 +24,7 @@ export const usePlayerOperations = () => {
           name: p.name,
           states: p.states as string[],
           score: p.score,
-          databaseId: p.id
+          databaseId: p.id  // Store the database UUID separately
         }));
       }
     } catch (error) {
@@ -63,7 +63,7 @@ export const usePlayerOperations = () => {
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score,
-          databaseId: newPlayer.id
+          databaseId: newPlayer.id  // Store the database UUID separately
         };
       }
     } catch (error) {

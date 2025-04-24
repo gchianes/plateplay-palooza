@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
@@ -64,6 +65,7 @@ export function useRemovePlayer({
         return;
       }
 
+      // Use the database UUID directly
       const { error } = await supabase
         .from('players')
         .delete()

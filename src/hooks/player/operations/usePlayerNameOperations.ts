@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
@@ -47,6 +48,7 @@ export function usePlayerNameOperations({
     }
 
     try {
+      // Use the database UUID, not the client-side numeric ID
       const { error } = await supabase
         .from('players')
         .update({ name: newName })

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Player } from '@/types/player';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,7 +46,7 @@ export function GameState({
         : [...currentPlayer.states, stateId];
       
       // Handle database update for non-mock games
-      if (currentGameId && currentGameId !== "mock-game-id") {
+      if (currentGameId && currentGameId !== "mock-game-id" && currentPlayer.databaseId) {
         await supabase
           .from('players')
           .update({
@@ -55,7 +54,7 @@ export function GameState({
             score: newStates.length
           })
           .eq('game_id', currentGameId)
-          .eq('id', activePlayer.toString());
+          .eq('id', currentPlayer.databaseId);
       }
 
       if (!hasState) {
