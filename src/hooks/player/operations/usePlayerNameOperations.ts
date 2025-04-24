@@ -16,13 +16,21 @@ export function usePlayerNameOperations({
 }: UsePlayerNameOperationsProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
     // Log the parameters to help diagnose issues
-    console.log(`Attempting to update player name. ID: ${playerId}, New name: ${newName}, Game ID: ${currentGameId}`);
-    console.log(`Player object:`, players.find(p => {
-      // Safely compare player ids regardless of their format
-      const id = p.id;
-      const numericId = getNumericId(id);
-      return numericId === playerId;
-    }));
+    console.log(`Attempting to update player name. Client ID: ${playerId}, New name: ${newName}, Game ID: ${currentGameId}`);
+    
+    // Find the player with the specified client-side ID to get their database ID
+    const playerToUpdate = players.find(p => p.id === playerId);
+    if (!playerToUpdate) {
+      console.error(`Player with client ID ${playerId} not found`);
+      toast({
+        title: "Error",
+        description: "Player not found",
+        duration: 3000,
+      });
+      return;
+    }
+
+    console.log(`Player object:`, playerToUpdate);
     
     // For mock game or missing game ID, only update locally
     if (!currentGameId || currentGameId === "mock-game-id") {
@@ -31,16 +39,28 @@ export function usePlayerNameOperations({
       return;
     }
 
+    // Make sure we have the database ID
+    if (!playerToUpdate.databaseId) {
+      console.error(`Player with client ID ${playerId} has no database ID`);
+      toast({
+        title: "Error",
+        description: "Player has no database ID",
+        duration: 3000,
+      });
+      updateLocalPlayerName(playerId, newName);
+      return;
+    }
+
     try {
-      // Convert number ID to string for database query
-      const playerIdString = playerId.toString();
-      console.log(`Updating player name in database. Player ID: ${playerIdString}`);
+      // Use the database ID (UUID string) for the database operation
+      const databaseId = playerToUpdate.databaseId;
+      console.log(`Updating player name in database. Database UUID: ${databaseId}`);
       
       const { error } = await supabase
         .from('players')
         .update({ name: newName })
         .eq('game_id', currentGameId)
-        .eq('id', playerIdString);
+        .eq('id', databaseId);
 
       if (error) {
         console.error('Error updating player name:', error);
@@ -63,29 +83,11 @@ export function usePlayerNameOperations({
     }
   };
 
-  // Helper function to safely convert any type of ID to a number
-  const getNumericId = (id: any): number => {
-    if (typeof id === 'number') {
-      return id;
-    } else if (id !== null && typeof id === 'object' && typeof id._type === 'string' && id._type === 'Number') {
-      return parseInt(id.value) || 0;
-    }
-    return 0;
-  };
-
   const updateLocalPlayerName = (playerId: number, newName: string) => {
     console.log(`Updating local player data. ID: ${playerId}, New name: ${newName}`);
     
     const updatedPlayers = players.map(player => {
-      // Add a console log to debug the comparison
-      const id = player.id;
-      
-      // Safely compare player ids regardless of their format
-      const currentId = getNumericId(id);
-        
-      console.log(`Checking player: ${currentId} against: ${playerId}`);
-      
-      return currentId === playerId 
+      return player.id === playerId 
         ? { ...player, name: newName }
         : player;
     });

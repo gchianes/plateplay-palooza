@@ -35,48 +35,27 @@ export function useRemovePlayer({
       return;
     }
 
+    // Find the player with the client-side ID to access their database ID
+    const playerToRemove = currentPlayers.find(p => p.id === playerId);
+    if (!playerToRemove) {
+      console.error('Player not found:', playerId);
+      toast({
+        title: "Error",
+        description: "Player not found",
+        duration: 3000,
+      });
+      return;
+    }
+
     // Handle mock game ID or missing game ID with local player removal
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log("Using mock game ID, removing player locally");
-      
-      const playerToRemove = currentPlayers.find(p => p.id === playerId);
-      if (playerToRemove) {
-        const updatedStates = globalSpottedStates.filter(
-          stateId => !playerToRemove.states.includes(stateId)
-        );
-        setGlobalSpottedStates(updatedStates);
-      }
-      
-      const updatedPlayers = currentPlayers.filter(p => p.id !== playerId);
-      setPlayers(updatedPlayers);
-      
-      if (activePlayer === playerId && updatedPlayers.length > 0) {
-        setActivePlayer(updatedPlayers[0].id);
-      }
-      
-      toast({
-        title: "Player removed",
-        description: "Player has been removed from the game.",
-        duration: 3000,
-      });
-      
+      removePlayerLocally(playerToRemove, playerId);
       return;
     }
 
     try {
-      // Find the player in the current players array
-      const playerToRemove = currentPlayers.find(p => p.id === playerId);
-      if (!playerToRemove) {
-        console.error('Player not found:', playerId);
-        toast({
-          title: "Error",
-          description: "Player not found",
-          duration: 3000,
-        });
-        return;
-      }
-      
-      console.log("Removing player:", playerId);
+      console.log("Removing player with client ID:", playerId);
       
       // In Supabase, we need the database ID which is stored in playerToRemove.databaseId
       if (!playerToRemove.databaseId) {
@@ -86,10 +65,12 @@ export function useRemovePlayer({
           description: "Player has no database ID",
           duration: 3000,
         });
+        // Fall back to local removal if no database ID
+        removePlayerLocally(playerToRemove, playerId);
         return;
       }
 
-      // Use the UUID string directly from databaseId - no need to convert
+      // Use the UUID string directly from databaseId for the database operation
       const { error } = await supabase
         .from('players')
         .delete()
@@ -106,26 +87,8 @@ export function useRemovePlayer({
         return;
       }
 
-      if (playerToRemove) {
-        const updatedStates = globalSpottedStates.filter(
-          stateId => !playerToRemove.states.includes(stateId)
-        );
-        setGlobalSpottedStates(updatedStates);
-      }
-      
-      const updatedPlayers = currentPlayers.filter(p => p.id !== playerId);
-      console.log("Updated players after removal:", updatedPlayers);
-      setPlayers(updatedPlayers);
-      
-      if (activePlayer === playerId && updatedPlayers.length > 0) {
-        setActivePlayer(updatedPlayers[0].id);
-      }
-      
-      toast({
-        title: "Player removed",
-        description: "Player has been removed from the game.",
-        duration: 3000,
-      });
+      // If database operation succeeded, update local state as well
+      removePlayerLocally(playerToRemove, playerId);
     } catch (error) {
       console.error('Error removing player:', error);
       toast({
@@ -134,6 +97,30 @@ export function useRemovePlayer({
         duration: 3000,
       });
     }
+  };
+
+  // Helper function to handle local player removal
+  const removePlayerLocally = (playerToRemove: Player, playerId: number) => {
+    if (playerToRemove) {
+      const updatedStates = globalSpottedStates.filter(
+        stateId => !playerToRemove.states.includes(stateId)
+      );
+      setGlobalSpottedStates(updatedStates);
+    }
+    
+    const updatedPlayers = players.filter(p => p.id !== playerId);
+    console.log("Updated players after removal:", updatedPlayers);
+    setPlayers(updatedPlayers);
+    
+    if (activePlayer === playerId && updatedPlayers.length > 0) {
+      setActivePlayer(updatedPlayers[0].id);
+    }
+    
+    toast({
+      title: "Player removed",
+      description: "Player has been removed from the game.",
+      duration: 3000,
+    });
   };
 
   return {

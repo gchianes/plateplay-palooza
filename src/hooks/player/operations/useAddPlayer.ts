@@ -101,10 +101,11 @@ export function useAddPlayer({
         
         // Format the player to match our Player type
         const formattedPlayer: Player = {
-          id: parseInt(newPlayer.id),
+          id: currentPlayers.length + 1, // Client-side numeric ID
           name: newPlayer.name,
           states: newPlayer.states as string[],
-          score: newPlayer.score
+          score: newPlayer.score || 0,
+          databaseId: newPlayer.id.toString() // Ensure database ID is stored as string
         };
         
         // Update the players state
