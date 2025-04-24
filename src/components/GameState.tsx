@@ -45,7 +45,12 @@ export function GameState({
   }, [players, setGlobalSpottedStates]);
 
   const handleToggleState = async (stateId: string) => {
-    if (globalSpottedStates.includes(stateId)) {
+    const currentPlayer = players.find(p => p.id === activePlayer);
+    if (!currentPlayer) return;
+
+    const hasState = currentPlayer.states.includes(stateId);
+
+    if (!hasState && globalSpottedStates.includes(stateId)) {
       toast({
         title: "State already spotted",
         description: "This state has already been spotted by another player.",
@@ -54,65 +59,57 @@ export function GameState({
       return;
     }
 
-    try {
-      const currentPlayer = players.find(p => p.id === activePlayer);
-      if (!currentPlayer) return;
+    const newStates = hasState 
+      ? currentPlayer.states.filter(id => id !== stateId)
+      : [...currentPlayer.states, stateId];
+    
+    if (currentGameId && currentGameId !== "mock-game-id") {
+      const success = await updatePlayerStates(currentPlayer, newStates);
+      if (!success) {
+        toast({
+          title: "Error",
+          description: "Failed to update state in database",
+          duration: 3000,
+        });
+        return;
+      }
+    }
 
-      const hasState = currentPlayer.states.includes(stateId);
-      const newStates = hasState 
-        ? currentPlayer.states.filter(id => id !== stateId)
-        : [...currentPlayer.states, stateId];
+    if (hasState) {
+      const otherPlayersWithState = players.some(p => 
+        p.id !== activePlayer && p.states.includes(stateId)
+      );
       
-      // Update player states in the database
-      if (currentGameId && currentGameId !== "mock-game-id") {
-        const success = await updatePlayerStates(currentPlayer, newStates);
-        if (!success) {
-          toast({
-            title: "Error",
-            description: "Failed to update state in database",
-            duration: 3000,
-          });
-          return;
-        }
-      }
-
-      if (!hasState) {
-        setGlobalSpottedStates([...globalSpottedStates, stateId]);
-        toast({
-          title: `License plate spotted!`,
-          description: `${currentPlayer.name} spotted ${states.find(s => s.id === stateId)?.name}`,
-          duration: 3000,
-        });
-      } else {
+      if (!otherPlayersWithState) {
         setGlobalSpottedStates(globalSpottedStates.filter(id => id !== stateId));
-        toast({
-          title: `Removed from spotted list`,
-          description: `${states.find(s => s.id === stateId)?.name} removed from ${currentPlayer.name}'s collection`,
-          duration: 3000,
-        });
       }
 
-      setPlayers(players.map(player => {
-        if (player.id !== activePlayer) return player;
-        return {
-          ...player,
-          states: newStates,
-          score: newStates.length
-        };
-      }));
-    } catch (error) {
-      console.error('Error toggling state:', error);
       toast({
-        title: "Error",
-        description: "Failed to update state",
+        title: "State removed",
+        description: `${states.find(s => s.id === stateId)?.name} removed from ${currentPlayer.name}'s collection`,
+        duration: 3000,
+      });
+    } else {
+      setGlobalSpottedStates([...globalSpottedStates, stateId]);
+      toast({
+        title: "License plate spotted!",
+        description: `${currentPlayer.name} spotted ${states.find(s => s.id === stateId)?.name}`,
         duration: 3000,
       });
     }
+
+    setPlayers(players.map(player => {
+      if (player.id !== activePlayer) return player;
+      return {
+        ...player,
+        states: newStates,
+        score: newStates.length
+      };
+    }));
   };
 
   const handleNewGame = async () => {
     try {
-      // Reset all player states in the database
       if (currentGameId && currentGameId !== "mock-game-id") {
         const updatePromises = players.map(player => 
           updatePlayerStates(player, [])
@@ -120,7 +117,6 @@ export function GameState({
         await Promise.all(updatePromises);
       }
 
-      // Reset all player states in the UI
       setPlayers(players.map(player => ({
         ...player,
         states: [],
