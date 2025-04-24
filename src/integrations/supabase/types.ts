@@ -39,6 +39,7 @@ export type Database = {
           game_id: string
           id: string
           name: string
+          player_number: number
           score: number
           states: Json
           updated_at: string
@@ -48,6 +49,7 @@ export type Database = {
           game_id: string
           id?: string
           name: string
+          player_number: number
           score?: number
           states?: Json
           updated_at?: string
@@ -57,6 +59,7 @@ export type Database = {
           game_id?: string
           id?: string
           name?: string
+          player_number?: number
           score?: number
           states?: Json
           updated_at?: string

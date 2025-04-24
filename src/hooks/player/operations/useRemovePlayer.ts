@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
@@ -23,7 +22,6 @@ export function useRemovePlayer({
   setGlobalSpottedStates
 }: UseRemovePlayerProps) {
   const handleRemovePlayer = async (playerId: number) => {
-    // Always ensure players is an array
     const currentPlayers = Array.isArray(players) ? players : [];
     
     if (currentPlayers.length <= 1) {
@@ -35,7 +33,6 @@ export function useRemovePlayer({
       return;
     }
 
-    // Find the player with the client-side ID to access their database ID
     const playerToRemove = currentPlayers.find(p => p.id === playerId);
     if (!playerToRemove) {
       console.error('Player not found:', playerId);
@@ -47,7 +44,6 @@ export function useRemovePlayer({
       return;
     }
 
-    // Handle mock game ID or missing game ID with local player removal
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log("Using mock game ID, removing player locally");
       removePlayerLocally(playerToRemove, playerId);
@@ -57,7 +53,6 @@ export function useRemovePlayer({
     try {
       console.log("Removing player with client ID:", playerId);
       
-      // In Supabase, we need the database ID which is stored in playerToRemove.databaseId
       if (!playerToRemove.databaseId) {
         console.error('Player has no database ID:', playerId);
         toast({
@@ -65,16 +60,13 @@ export function useRemovePlayer({
           description: "Player has no database ID",
           duration: 3000,
         });
-        // Fall back to local removal if no database ID
         removePlayerLocally(playerToRemove, playerId);
         return;
       }
 
-      // Use the UUID string directly from databaseId for the database operation
       const { error } = await supabase
         .from('players')
         .delete()
-        .eq('game_id', currentGameId)
         .eq('id', playerToRemove.databaseId);
 
       if (error) {
@@ -87,7 +79,6 @@ export function useRemovePlayer({
         return;
       }
 
-      // If database operation succeeded, update local state as well
       removePlayerLocally(playerToRemove, playerId);
     } catch (error) {
       console.error('Error removing player:', error);
@@ -99,7 +90,6 @@ export function useRemovePlayer({
     }
   };
 
-  // Helper function to handle local player removal
   const removePlayerLocally = (playerToRemove: Player, playerId: number) => {
     if (playerToRemove) {
       const updatedStates = globalSpottedStates.filter(

@@ -20,11 +20,11 @@ export const usePlayerOperations = () => {
 
       if (playersData && playersData.length > 0) {
         return playersData.map(p => ({
-          id: p.id, // Keep the UUID as is, don't convert to number
+          id: p.player_number,
           name: p.name,
           states: p.states as string[],
           score: p.score,
-          databaseId: p.databaseId
+          databaseId: p.id
         }));
       }
     } catch (error) {
@@ -46,7 +46,8 @@ export const usePlayerOperations = () => {
           game_id: gameId,
           name: 'Player 1',
           states: [],
-          score: 0
+          score: 0,
+          player_number: 1
         })
         .select()
         .single();
@@ -58,11 +59,11 @@ export const usePlayerOperations = () => {
 
       if (newPlayer) {
         return {
-          id: newPlayer.id, // Keep as string UUID
+          id: newPlayer.player_number,
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score,
-          databaseId: newPlayer.databaseId
+          databaseId: newPlayer.id
         };
       }
     } catch (error) {

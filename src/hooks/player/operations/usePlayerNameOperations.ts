@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
@@ -15,10 +14,8 @@ export function usePlayerNameOperations({
   setPlayers
 }: UsePlayerNameOperationsProps) {
   const handleNameChange = async (playerId: number, newName: string) => {
-    // Log the parameters to help diagnose issues
     console.log(`Attempting to update player name. Client ID: ${playerId}, New name: ${newName}, Game ID: ${currentGameId}`);
     
-    // Find the player with the specified client-side ID to get their database ID
     const playerToUpdate = players.find(p => p.id === playerId);
     if (!playerToUpdate) {
       console.error(`Player with client ID ${playerId} not found`);
@@ -32,14 +29,12 @@ export function usePlayerNameOperations({
 
     console.log(`Player object:`, playerToUpdate);
     
-    // For mock game or missing game ID, only update locally
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log(`Using mock game ID, updating player ${playerId} name to ${newName} locally`);
       updateLocalPlayerName(playerId, newName);
       return;
     }
 
-    // Make sure we have the database ID
     if (!playerToUpdate.databaseId) {
       console.error(`Player with client ID ${playerId} has no database ID`);
       toast({
@@ -52,15 +47,10 @@ export function usePlayerNameOperations({
     }
 
     try {
-      // Use the database ID (UUID string) for the database operation
-      const databaseId = playerToUpdate.databaseId;
-      console.log(`Updating player name in database. Database UUID: ${databaseId}`);
-      
       const { error } = await supabase
         .from('players')
         .update({ name: newName })
-        .eq('game_id', currentGameId)
-        .eq('id', databaseId);
+        .eq('id', playerToUpdate.databaseId);
 
       if (error) {
         console.error('Error updating player name:', error);

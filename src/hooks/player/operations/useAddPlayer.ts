@@ -18,12 +18,10 @@ export function useAddPlayer({
   setActivePlayer
 }: UseAddPlayerProps) {
   const handleAddPlayer = async () => {
-    // Always ensure players is an array
     const currentPlayers = Array.isArray(players) ? players : [];
     
     console.log("handleAddPlayer called with:", { currentGameId, playerCount: currentPlayers.length });
     
-    // Check for maximum players
     if (currentPlayers.length >= 6) {
       toast({
         title: "Maximum players reached",
@@ -33,32 +31,24 @@ export function useAddPlayer({
       return;
     }
 
-    const playerName = `Player ${currentPlayers.length + 1}`;
+    const newPlayerNumber = currentPlayers.length + 1;
+    const playerName = `Player ${newPlayerNumber}`;
     
-    // For mock game ID or missing game ID, create a local player
     if (!currentGameId || currentGameId === "mock-game-id") {
       console.log("Creating local player");
       
-      // Find the highest ID in the current players to avoid duplicate IDs
-      const highestId = currentPlayers.reduce((max, player) => 
-        player.id > max ? player.id : max, 0);
-      
-      const newPlayerId = highestId + 1;
       const newPlayer = {
-        id: newPlayerId,
+        id: newPlayerNumber,
         name: playerName,
         states: [],
         score: 0
       };
       
       const updatedPlayers = [...currentPlayers, newPlayer];
-      console.log("New player created locally:", newPlayer);
       console.log("Updated players array:", updatedPlayers);
       
-      // Update the players state
       setPlayers(updatedPlayers);
       
-      // If this is the first player, set them as active
       if (currentPlayers.length === 0) {
         setActivePlayer(newPlayer.id);
       }
@@ -71,7 +61,6 @@ export function useAddPlayer({
       return;
     }
     
-    // If we have a valid game ID, create a player in the database
     try {
       console.log("Creating player in database for game:", currentGameId);
       
@@ -81,7 +70,8 @@ export function useAddPlayer({
           game_id: currentGameId,
           name: playerName,
           states: [],
-          score: 0
+          score: 0,
+          player_number: newPlayerNumber
         })
         .select()
         .single();
@@ -99,21 +89,18 @@ export function useAddPlayer({
       if (newPlayer) {
         console.log("New player created in database:", newPlayer);
         
-        // Format the player to match our Player type
         const formattedPlayer: Player = {
-          id: currentPlayers.length + 1, // Client-side numeric ID
+          id: newPlayer.player_number,
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score || 0,
-          databaseId: newPlayer.id.toString() // Ensure database ID is stored as string
+          databaseId: newPlayer.id
         };
         
-        // Update the players state
         const updatedPlayers = [...currentPlayers, formattedPlayer];
         console.log("Updated players array:", updatedPlayers);
         setPlayers(updatedPlayers);
         
-        // If this is the first player, set them as active
         if (currentPlayers.length === 0) {
           setActivePlayer(formattedPlayer.id);
         }
