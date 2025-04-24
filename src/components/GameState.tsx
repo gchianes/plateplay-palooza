@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Player } from '@/types/player';
 import { usePlayerOperations } from '@/hooks/game/operations/usePlayerOperations';
@@ -154,8 +155,8 @@ export function GameState({
   });
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-4">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <ScoreBoard 
           spottedStates={spottedStates} 
           totalStates={states.length} 
@@ -167,19 +168,19 @@ export function GameState({
         <Button 
           variant="outline" 
           onClick={handleNewGame}
-          className="ml-4"
+          className="w-full sm:w-auto"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Start New Game
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
         {isMapVisible && (
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-5">United States Map</h2>
+          <div className="lg:col-span-2 overflow-x-auto">
+            <div className="bg-white rounded-2xl shadow-xl p-4">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">United States Map</h2>
+              <div className="min-w-[300px]">
                 <USAMap 
                   spottedStates={globalSpottedStates}
                   onStateClick={handleToggleState}
@@ -196,6 +197,6 @@ export function GameState({
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }
