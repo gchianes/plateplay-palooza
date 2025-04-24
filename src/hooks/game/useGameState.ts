@@ -18,6 +18,23 @@ export function useGameState(user: User | null): UseGameStateReturn {
     states: [],
     score: 0
   }];
+
+  // Initialize states from loaded players
+  useEffect(() => {
+    if (players.length > 0) {
+      const allSpottedStates = players.reduce((acc: string[], player) => {
+        player.states.forEach(state => {
+          if (!acc.includes(state)) {
+            acc.push(state);
+          }
+        });
+        return acc;
+      }, []);
+      
+      console.log("Initializing global spotted states from loaded players:", allSpottedStates);
+      setGlobalSpottedStates(allSpottedStates);
+    }
+  }, [players]);
   
   const setPlayers = (newPlayers: Player[]) => {
     updatePlayers(newPlayers);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Player } from '@/types/player';
 import { usePlayerOperations } from '@/hooks/game/operations/usePlayerOperations';
 import { states } from '@/utils/stateData';
@@ -27,6 +27,20 @@ export function GameState({
   isMapVisible
 }: GameStateProps) {
   const { updatePlayerStates } = usePlayerOperations();
+
+  useEffect(() => {
+    const allSpottedStates = players.reduce((acc: string[], player) => {
+      player.states.forEach(state => {
+        if (!acc.includes(state)) {
+          acc.push(state);
+        }
+      });
+      return acc;
+    }, []);
+    
+    console.log("Setting global spotted states from players:", allSpottedStates);
+    setGlobalSpottedStates(allSpottedStates);
+  }, [players, setGlobalSpottedStates]);
 
   const handleToggleState = async (stateId: string) => {
     if (globalSpottedStates.includes(stateId)) {
