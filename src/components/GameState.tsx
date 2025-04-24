@@ -125,11 +125,12 @@ export function GameState({
   return (
     <>
       <ScoreBoard 
-        spottedStates={spottedStates.length} 
+        spottedStates={spottedStates}
         totalStates={states.length} 
         progress={progress} 
         score={score}
         playerName={currentPlayer?.name || ""}
+        currentPlayer={currentPlayer}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
