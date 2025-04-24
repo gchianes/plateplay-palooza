@@ -89,6 +89,7 @@ export function useRemovePlayer({
         return;
       }
 
+      // Use the UUID string directly from databaseId - no need to convert
       const { error } = await supabase
         .from('players')
         .delete()

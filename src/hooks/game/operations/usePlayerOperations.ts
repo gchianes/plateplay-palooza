@@ -20,7 +20,7 @@ export const usePlayerOperations = () => {
 
       if (playersData && playersData.length > 0) {
         return playersData.map(p => ({
-          id: parseInt(p.id),
+          id: p.id, // Keep the UUID as is, don't convert to number
           name: p.name,
           states: p.states as string[],
           score: p.score
@@ -57,7 +57,7 @@ export const usePlayerOperations = () => {
 
       if (newPlayer) {
         return {
-          id: parseInt(newPlayer.id),
+          id: newPlayer.id, // Keep as string UUID
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score
