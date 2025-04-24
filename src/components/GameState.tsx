@@ -1,11 +1,11 @@
 import React from 'react';
 import { Player } from '@/types/player';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { usePlayerOperations } from '@/hooks/game/operations/usePlayerOperations';
 import { states } from '@/utils/stateData';
 import ScoreBoard from './ScoreBoard';
 import USAMap from './USAMap';
 import LicensePlateList from './LicensePlateList';
+import { toast } from '@/components/ui/use-toast';
 
 interface GameStateProps {
   players: Player[];
@@ -26,6 +26,8 @@ export function GameState({
   currentGameId,
   isMapVisible
 }: GameStateProps) {
+  const { updatePlayerStates } = usePlayerOperations();
+
   const handleToggleState = async (stateId: string) => {
     if (globalSpottedStates.includes(stateId)) {
       toast({
@@ -45,26 +47,16 @@ export function GameState({
         ? currentPlayer.states.filter(id => id !== stateId)
         : [...currentPlayer.states, stateId];
       
-      // Handle database update for non-mock games
-      if (currentGameId && currentGameId !== "mock-game-id" && currentPlayer.databaseId) {
-        // Log the exact UUID we're using
-        console.log(`Updating state for player with client ID ${activePlayer} using database UUID: "${currentPlayer.databaseId}" (type: ${typeof currentPlayer.databaseId})`);
-        
-        const { error } = await supabase
-          .from('players')
-          .update({
-            states: newStates,
-            score: newStates.length
-          })
-          .eq('id', currentPlayer.databaseId);
-          
-        if (error) {
-          console.error('Error updating player state:', error);
+      // Update player states in the database
+      if (currentGameId && currentGameId !== "mock-game-id") {
+        const success = await updatePlayerStates(currentPlayer, newStates);
+        if (!success) {
           toast({
             title: "Error",
             description: "Failed to update state in database",
             duration: 3000,
           });
+          return;
         }
       }
 

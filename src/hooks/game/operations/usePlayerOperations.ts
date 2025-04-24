@@ -23,8 +23,7 @@ export const usePlayerOperations = () => {
       if (playersData && playersData.length > 0) {
         console.log("Player data from database:", playersData);
         
-        // Convert Supabase response to our Player type, ensuring ID mapping is correct
-        return playersData.map((p, index) => ({
+        return playersData.map(p => ({
           id: p.player_number,
           name: p.name,
           states: p.states as string[],
@@ -72,7 +71,7 @@ export const usePlayerOperations = () => {
           name: newPlayer.name,
           states: newPlayer.states as string[],
           score: newPlayer.score,
-          databaseId: newPlayer.id  // Store the database UUID separately
+          databaseId: newPlayer.id
         };
       }
     } catch (error) {
@@ -80,6 +79,39 @@ export const usePlayerOperations = () => {
     }
     
     return createDefaultPlayer();
+  };
+
+  const updatePlayerStates = async (player: Player, states: string[]) => {
+    if (!player.databaseId) {
+      console.error('Cannot update player states: Missing database ID');
+      return false;
+    }
+
+    try {
+      console.log(`Updating states for player with database ID: ${player.databaseId}`);
+      const { error } = await supabase
+        .from('players')
+        .update({ 
+          states: states,
+          score: states.length 
+        })
+        .eq('id', player.databaseId);
+
+      if (error) {
+        console.error('Error updating player states:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update player states in database",
+          duration: 3000,
+        });
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating player states:', error);
+      return false;
+    }
   };
 
   const createDefaultPlayer = (): Player => {
@@ -106,6 +138,7 @@ export const usePlayerOperations = () => {
     fetchPlayers,
     createInitialPlayer,
     setDefaultPlayer,
-    createDefaultPlayer
+    createDefaultPlayer,
+    updatePlayerStates
   };
 };
