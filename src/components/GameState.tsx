@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Player } from '@/types/player';
 import { usePlayerOperations } from '@/hooks/game/operations/usePlayerOperations';
@@ -7,6 +6,8 @@ import ScoreBoard from './ScoreBoard';
 import USAMap from './USAMap';
 import LicensePlateList from './LicensePlateList';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 interface GameStateProps {
   players: Player[];
@@ -109,6 +110,39 @@ export function GameState({
     }
   };
 
+  const handleNewGame = async () => {
+    try {
+      // Reset all player states in the database
+      if (currentGameId && currentGameId !== "mock-game-id") {
+        const updatePromises = players.map(player => 
+          updatePlayerStates(player, [])
+        );
+        await Promise.all(updatePromises);
+      }
+
+      // Reset all player states in the UI
+      setPlayers(players.map(player => ({
+        ...player,
+        states: [],
+        score: 0
+      })));
+      setGlobalSpottedStates([]);
+
+      toast({
+        title: "New Game Started",
+        description: "All player states have been reset",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error starting new game:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start new game",
+        duration: 3000,
+      });
+    }
+  };
+
   const currentPlayer = players.find(p => p.id === activePlayer) || players[0];
   const spottedStates = currentPlayer?.states || [];
   const score = currentPlayer?.score || 0;
@@ -125,14 +159,24 @@ export function GameState({
 
   return (
     <>
-      <ScoreBoard 
-        spottedStates={spottedStates} 
-        totalStates={states.length} 
-        progress={progress} 
-        score={score}
-        playerName={currentPlayer?.name || ""}
-        currentPlayer={currentPlayer}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <ScoreBoard 
+          spottedStates={spottedStates} 
+          totalStates={states.length} 
+          progress={progress} 
+          score={score}
+          playerName={currentPlayer?.name || ""}
+          currentPlayer={currentPlayer}
+        />
+        <Button 
+          variant="outline" 
+          onClick={handleNewGame}
+          className="ml-4"
+        >
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Start New Game
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
         {isMapVisible && (
