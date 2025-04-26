@@ -2,7 +2,6 @@
 import React from 'react';
 import { Trophy, Flag } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { states } from '@/utils/stateData';
 import { Player } from '@/types/player';
 
@@ -23,11 +22,6 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
   playerName,
   currentPlayer
 }) => {
-  const spottedStateNames = spottedStates
-    .map(stateId => states.find(s => s.id === stateId)?.name)
-    .filter(name => name)
-    .sort();
-
   return (
     <div className="bg-white rounded-lg shadow-md p-4 w-full">
       <div className="text-center mb-4">
@@ -55,21 +49,6 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
           <h2 className="text-xl sm:text-2xl font-bold">{Math.round(progress)}%</h2>
           <p className="text-xs sm:text-sm text-muted-foreground">Progress</p>
         </div>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-          Spotted States/Provinces:
-        </h3>
-        <ScrollArea className="h-[80px] sm:h-[100px] w-full rounded-md border p-2">
-          <div className="grid grid-cols-2 gap-2 pr-4">
-            {spottedStateNames.map((stateName) => (
-              <div key={stateName} className="text-xs sm:text-sm">
-                {stateName}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
       </div>
     </div>
   );

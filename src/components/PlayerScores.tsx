@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trophy, UserPlus, X, Pen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { states } from '@/utils/stateData';
 
 interface PlayerScoresProps {
   players: Player[];
@@ -28,17 +28,16 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
+  const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
 
   const handleEditStart = (player: Player) => {
     console.log("Starting edit for player:", player);
     
-    // Safely handle player.id regardless of its type
     let playerId = getNumericId(player.id);
     setEditingId(playerId);
     setEditName(player.name);
   };
 
-  // Helper function to safely convert any type of ID to a number
   const getNumericId = (id: any): number => {
     if (typeof id === 'number') {
       return id;
@@ -70,6 +69,13 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     onPlayerAdd();
   };
 
+  const getSpottedStateNames = (stateIds: string[]) => {
+    return stateIds
+      .map(stateId => states.find(s => s.id === stateId)?.name)
+      .filter(name => name)
+      .sort();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -86,70 +92,91 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         )}
       </div>
 
-      <ScrollArea className="h-[200px]">
-        <div className="space-y-2">
+      <ScrollArea className="h-[400px]">
+        <div className="space-y-4">
           {players.map((player) => {
-            // Safely extract player ID using our helper function
             const playerId = getNumericId(player.id);
-            
-            console.log(`Rendering player: ${player.name}, ID: ${playerId}, Type: ${typeof playerId}`);
+            const isExpanded = expandedPlayer === playerId;
+            const spottedStateNames = getSpottedStateNames(player.states);
                   
             return (
               <div
                 key={playerId}
                 className={cn(
-                  "flex items-center justify-between p-3 rounded-lg border",
+                  "flex flex-col p-3 rounded-lg border",
                   activePlayer === playerId ? "bg-secondary/20 border-secondary" : "bg-background"
                 )}
               >
-                <button
-                  className="flex items-center space-x-3 flex-1"
-                  onClick={() => onPlayerSelect(playerId)}
-                >
-                  <Trophy className="h-4 w-4 text-accent" />
-                  <div className="flex flex-col flex-1">
-                    {editingId === playerId ? (
-                      <Input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        onBlur={handleEditSave}
-                        className="h-7 py-1"
-                        autoFocus
-                      />
-                    ) : (
-                      <>
-                        <span className="font-medium">
-                          {player.name}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          States: {player.states.length} | Score: {player.score}
-                        </span>
-                      </>
+                <div className="flex items-center justify-between">
+                  <button
+                    className="flex items-center space-x-3 flex-1"
+                    onClick={() => {
+                      onPlayerSelect(playerId);
+                      setExpandedPlayer(isExpanded ? null : playerId);
+                    }}
+                  >
+                    <Trophy className="h-4 w-4 text-accent" />
+                    <div className="flex flex-col flex-1">
+                      {editingId === playerId ? (
+                        <Input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyDown={handleKeyPress}
+                          onBlur={handleEditSave}
+                          className="h-7 py-1"
+                          autoFocus
+                        />
+                      ) : (
+                        <>
+                          <span className="font-medium">
+                            {player.name}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            States/Provinces: {player.states.length} | Score: {player.score}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {editingId !== playerId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditStart(player)}
+                      >
+                        <Pen className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    )}
+                    {players.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onPlayerRemove(playerId)}
+                        disabled={!canAddPlayer}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      </Button>
                     )}
                   </div>
-                </button>
-                <div className="flex items-center gap-2">
-                  {editingId !== playerId && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditStart(player)}
-                    >
-                      <Pen className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  )}
-                  {players.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onPlayerRemove(playerId)}
-                      disabled={!canAddPlayer}
-                    >
-                      <X className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  )}
                 </div>
+
+                {isExpanded && spottedStateNames.length > 0 && (
+                  <div className="mt-3 pl-7">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">
+                      Spotted States/Provinces:
+                    </h4>
+                    <ScrollArea className="h-[100px] w-full rounded-md border p-2">
+                      <div className="grid grid-cols-2 gap-2 pr-4">
+                        {spottedStateNames.map((stateName) => (
+                          <div key={stateName} className="text-xs sm:text-sm">
+                            {stateName}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
               </div>
             );
           })}
