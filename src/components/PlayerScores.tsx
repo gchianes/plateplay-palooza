@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
@@ -103,104 +102,102 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         )}
       </div>
 
-      <ScrollArea className="h-[400px]">
-        <div className="space-y-4">
-          {players.map((player) => {
-            const playerId = getNumericId(player.id);
-            const isExpanded = expandedPlayers.includes(playerId);
-            const spottedStates = getSpottedStateNames(player.states);
-            
-            return (
-              <div
-                key={playerId}
-                className={cn(
-                  "flex flex-col p-3 rounded-lg border",
-                  activePlayer === playerId ? "bg-secondary/20 border-secondary" : "bg-background"
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <button
-                    className="flex items-center space-x-3 flex-1"
-                    onClick={() => {
-                      onPlayerSelect(playerId);
-                      togglePlayerExpansion(playerId);
-                    }}
-                  >
-                    <Trophy className="h-4 w-4 text-accent" />
-                    <div className="flex flex-col flex-1">
-                      {editingId === playerId ? (
-                        <Input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          onKeyDown={handleKeyPress}
-                          onBlur={handleEditSave}
-                          className="h-7 py-1"
-                          autoFocus
-                        />
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{player.name}</span>
-                            {isExpanded ? (
-                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            States/Provinces: {player.states.length} | Score: {player.score}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </button>
-                  <div className="flex items-center gap-2">
-                    {editingId !== playerId && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditStart(player)}
-                      >
-                        <Pen className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    )}
-                    {players.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onPlayerRemove(playerId)}
-                        disabled={!canAddPlayer}
-                      >
-                        <X className="h-4 w-4 text-muted-foreground" />
-                      </Button>
+      <div className="space-y-4">
+        {players.map((player) => {
+          const playerId = getNumericId(player.id);
+          const isExpanded = expandedPlayers.includes(playerId);
+          const spottedStates = getSpottedStateNames(player.states);
+          
+          return (
+            <div
+              key={playerId}
+              className={cn(
+                "flex flex-col p-3 rounded-lg border",
+                activePlayer === playerId ? "bg-secondary/20 border-secondary" : "bg-background"
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <button
+                  className="flex items-center space-x-3 flex-1"
+                  onClick={() => {
+                    onPlayerSelect(playerId);
+                    togglePlayerExpansion(playerId);
+                  }}
+                >
+                  <Trophy className="h-4 w-4 text-accent" />
+                  <div className="flex flex-col flex-1">
+                    {editingId === playerId ? (
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        onBlur={handleEditSave}
+                        className="h-7 py-1"
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{player.name}</span>
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          States/Provinces: {player.states.length} | Score: {player.score}
+                        </span>
+                      </>
                     )}
                   </div>
+                </button>
+                <div className="flex items-center gap-2">
+                  {editingId !== playerId && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditStart(player)}
+                    >
+                      <Pen className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  )}
+                  {players.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onPlayerRemove(playerId)}
+                      disabled={!canAddPlayer}
+                    >
+                      <X className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  )}
                 </div>
-
-                {isExpanded && (
-                  <div className="mt-3 pl-7">
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">
-                      Spotted States/Provinces:
-                    </h4>
-                    <ScrollArea className="h-[100px] w-full rounded-md border p-2">
-                      <div className="space-y-1">
-                        {spottedStates.map(({ name, points }) => (
-                          <div key={name} className="text-xs sm:text-sm flex justify-between pr-4">
-                            <span>{name}</span>
-                            <span className="text-muted-foreground">
-                              {points} {points === 1 ? 'point' : 'points'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                )}
               </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
+
+              {isExpanded && (
+                <div className="mt-3 pl-7">
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">
+                    Spotted States/Provinces:
+                  </h4>
+                  <ScrollArea className="max-h-[200px] w-full rounded-md border p-2">
+                    <div className="space-y-1">
+                      {spottedStates.map(({ name, points }) => (
+                        <div key={name} className="text-xs sm:text-sm flex justify-between pr-4">
+                          <span>{name}</span>
+                          <span className="text-muted-foreground">
+                            {points} {points === 1 ? 'point' : 'points'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
