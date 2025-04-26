@@ -45,7 +45,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
           <h2 className="text-xl sm:text-2xl font-bold">
             {spottedStates.length} / {totalStates}
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">States Spotted</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">States/Provinces Spotted</p>
         </div>
         
         <div className="flex flex-col items-center justify-center p-2 col-span-2 sm:col-span-1">
@@ -59,7 +59,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
 
       <div className="mt-4">
         <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-          Spotted States:
+          Spotted States/Provinces:
         </h3>
         <ScrollArea className="h-[80px] sm:h-[100px] w-full rounded-md border p-2">
           <div className="grid grid-cols-2 gap-2 pr-4">
