@@ -77,13 +77,10 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     return stateIds
       .map(stateId => {
         const stateData = states.find(s => s.id === stateId);
-        return {
-          name: stateData?.name || '',
-          points: stateData?.points || 1
-        };
+        return stateData?.name || '';
       })
-      .filter(state => state.name)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .filter(name => name)
+      .sort((a, b) => a.localeCompare(b));
   };
 
   return (
@@ -182,12 +179,9 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                   </h4>
                   <ScrollArea className="max-h-[200px] w-full rounded-md border p-2">
                     <div className="space-y-1">
-                      {spottedStates.map(({ name, points }) => (
-                        <div key={name} className="text-xs sm:text-sm flex justify-between pr-4">
-                          <span>{name}</span>
-                          <span className="text-muted-foreground">
-                            {points} {points === 1 ? 'point' : 'points'}
-                          </span>
+                      {spottedStates.map((name) => (
+                        <div key={name} className="text-xs sm:text-sm">
+                          {name}
                         </div>
                       ))}
                     </div>
