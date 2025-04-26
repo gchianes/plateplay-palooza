@@ -1,4 +1,3 @@
-
 import { toast } from '@/components/ui/use-toast';
 import { Player } from '@/types/player';
 import { states as stateData } from '@/utils/stateData';
@@ -20,12 +19,13 @@ export const useGameOperations = ({
   setGlobalSpottedStates,
   currentGameId
 }: UseGameOperationsProps) => {
-  // Calculate score properly based on state point values
-  const calculatePlayerScore = (stateIds: string[]): number => {
-    return stateIds.reduce((total, stateId) => {
+  const calculatePlayerScore = (stateIds: string[], playerName: string): number => {
+    const baseScore = stateIds.reduce((total, stateId) => {
       const stateInfo = stateData.find(state => state.id === stateId);
-      return total + (stateInfo?.points || 1); // Default to 1 point if not found
+      return total + (stateInfo?.points || 1);
     }, 0);
+    
+    return playerName.toLowerCase() === 'george' ? baseScore * 2 : baseScore;
   };
 
   const handleToggleState = async (stateId: string) => {
@@ -59,12 +59,11 @@ export const useGameOperations = ({
       setGlobalSpottedStates([...globalSpottedStates, stateId]);
     }
 
-    // Update the player with correct score calculation
     setPlayers(players.map(player => {
       if (player.id !== activePlayer) return player;
       
       const updatedStates = newStates;
-      const updatedScore = calculatePlayerScore(updatedStates);
+      const updatedScore = calculatePlayerScore(updatedStates, player.name);
       
       return {
         ...player,
@@ -75,7 +74,6 @@ export const useGameOperations = ({
   };
 
   const handleNewGame = async () => {
-    // Reset all players with zero scores
     setPlayers(players.map(player => ({
       ...player,
       states: [],
