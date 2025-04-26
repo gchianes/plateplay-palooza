@@ -39,7 +39,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
           <h2 className="text-xl sm:text-2xl font-bold">
             {spottedStates.length} / {totalStates}
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">States/Provinces Spotted</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">States/Provinces</p>
         </div>
         
         <div className="flex flex-col items-center justify-center p-2 col-span-2 sm:col-span-1">

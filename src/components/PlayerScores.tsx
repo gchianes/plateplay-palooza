@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, UserPlus, X, Pen } from 'lucide-react';
+import { Trophy, UserPlus, X, Pen, ChevronDown, ChevronUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
 
@@ -28,11 +29,9 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
-  const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
+  const [expandedPlayers, setExpandedPlayers] = useState<number[]>([]);
 
   const handleEditStart = (player: Player) => {
-    console.log("Starting edit for player:", player);
-    
     let playerId = getNumericId(player.id);
     setEditingId(playerId);
     setEditName(player.name);
@@ -49,7 +48,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 
   const handleEditSave = () => {
     if (editingId !== null && editName.trim()) {
-      console.log(`Saving edit for player ID: ${editingId}, New name: ${editName.trim()}`);
       onPlayerNameChange(editingId, editName.trim());
       setEditingId(null);
     }
@@ -65,15 +63,28 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 
   const handleAddPlayerClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log("Add player button clicked in PlayerScores with canAddPlayer:", canAddPlayer);
     onPlayerAdd();
+  };
+
+  const togglePlayerExpansion = (playerId: number) => {
+    setExpandedPlayers(current => 
+      current.includes(playerId)
+        ? current.filter(id => id !== playerId)
+        : [...current, playerId]
+    );
   };
 
   const getSpottedStateNames = (stateIds: string[]) => {
     return stateIds
-      .map(stateId => states.find(s => s.id === stateId)?.name)
-      .filter(name => name)
-      .sort();
+      .map(stateId => {
+        const stateData = states.find(s => s.id === stateId);
+        return {
+          name: stateData?.name || '',
+          points: stateData?.points || 1
+        };
+      })
+      .filter(state => state.name)
+      .sort((a, b) => a.name.localeCompare(b.name));
   };
 
   return (
@@ -96,9 +107,9 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         <div className="space-y-4">
           {players.map((player) => {
             const playerId = getNumericId(player.id);
-            const isExpanded = expandedPlayer === playerId;
-            const spottedStateNames = getSpottedStateNames(player.states);
-                  
+            const isExpanded = expandedPlayers.includes(playerId);
+            const spottedStates = getSpottedStateNames(player.states);
+            
             return (
               <div
                 key={playerId}
@@ -112,7 +123,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                     className="flex items-center space-x-3 flex-1"
                     onClick={() => {
                       onPlayerSelect(playerId);
-                      setExpandedPlayer(isExpanded ? null : playerId);
+                      togglePlayerExpansion(playerId);
                     }}
                   >
                     <Trophy className="h-4 w-4 text-accent" />
@@ -128,9 +139,14 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                         />
                       ) : (
                         <>
-                          <span className="font-medium">
-                            {player.name}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{player.name}</span>
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
                           <span className="text-sm text-muted-foreground">
                             States/Provinces: {player.states.length} | Score: {player.score}
                           </span>
@@ -161,16 +177,19 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                   </div>
                 </div>
 
-                {isExpanded && spottedStateNames.length > 0 && (
+                {isExpanded && (
                   <div className="mt-3 pl-7">
                     <h4 className="text-sm font-semibold text-muted-foreground mb-2">
                       Spotted States/Provinces:
                     </h4>
                     <ScrollArea className="h-[100px] w-full rounded-md border p-2">
-                      <div className="grid grid-cols-2 gap-2 pr-4">
-                        {spottedStateNames.map((stateName) => (
-                          <div key={stateName} className="text-xs sm:text-sm">
-                            {stateName}
+                      <div className="space-y-1">
+                        {spottedStates.map(({ name, points }) => (
+                          <div key={name} className="text-xs sm:text-sm flex justify-between pr-4">
+                            <span>{name}</span>
+                            <span className="text-muted-foreground">
+                              {points} {points === 1 ? 'point' : 'points'}
+                            </span>
                           </div>
                         ))}
                       </div>
