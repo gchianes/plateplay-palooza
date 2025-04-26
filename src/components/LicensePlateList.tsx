@@ -23,8 +23,9 @@ const LicensePlateList: React.FC<LicensePlateListProps> = ({ states, onToggleSta
               key={state.id}
               variant="outline"
               className={cn(
-                "license-plate min-h-[4.5rem] p-2",
-                state.spotted && "spotted"
+                "license-plate min-h-[4.5rem] p-2 relative",
+                state.spotted && "spotted",
+                state.points > 1 && "border-2 border-amber-500"
               )}
               onClick={() => onToggleState(state.id)}
             >
@@ -35,6 +36,11 @@ const LicensePlateList: React.FC<LicensePlateListProps> = ({ states, onToggleSta
                   <X className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
                 )}
               </div>
+              {state.points > 1 && (
+                <div className="absolute top-1 left-1 bg-amber-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  {state.points}
+                </div>
+              )}
               <div className="flex flex-col items-center justify-center w-full">
                 <span className="text-xs sm:text-sm font-normal truncate max-w-full">
                   {state.name}
