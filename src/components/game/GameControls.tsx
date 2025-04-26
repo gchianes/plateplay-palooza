@@ -21,3 +21,4 @@ const GameControls: React.FC<GameControlsProps> = ({ onNewGame }) => {
 };
 
 export default GameControls;
+
