@@ -24,7 +24,7 @@ const Header: React.FC = () => {
           
           <div className="flex items-center space-x-4">
             <p className="text-sm text-muted-foreground hidden md:block">
-              Spot license plates from all 50 states (plus DC) on your road trip!
+              Spot license plates from all US states (plus DC) and Canadian provinces on your road trip!
             </p>
             
             {user ? (
