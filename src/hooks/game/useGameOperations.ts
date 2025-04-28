@@ -27,7 +27,7 @@ export const useGameOperations = ({
       return total + (stateInfo?.points || 1);
     }, 0);
     
-    return playerName.toLowerCase() === 'george' ? baseScore * 2 : baseScore;
+    return playerName.toLowerCase() === 'george' ? baseScore * 1 : baseScore;
   };
 
   const handleToggleState = async (stateId: string) => {
