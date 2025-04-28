@@ -1,3 +1,4 @@
+
 export interface StateData {
   id: string;
   name: string;
@@ -61,20 +62,20 @@ export const states: StateData[] = [
   { id: "WY", name: "Wyoming", abbreviation: "WY", spotted: false, points: 1 },
   { id: "DC", name: "Washington DC", abbreviation: "DC", spotted: false, points: 1 },
   
-  // Canadian Provinces (2 points each)
-  { id: "AB", name: "Alberta", abbreviation: "AB", spotted: false, points: 2 },
-  { id: "BC", name: "British Columbia", abbreviation: "BC", spotted: false, points: 2 },
-  { id: "MB", name: "Manitoba", abbreviation: "MB", spotted: false, points: 2 },
-  { id: "NB", name: "New Brunswick", abbreviation: "NB", spotted: false, points: 2 },
-  { id: "NL", name: "Newfoundland and Labrador", abbreviation: "NL", spotted: false, points: 2 },
-  { id: "NS", name: "Nova Scotia", abbreviation: "NS", spotted: false, points: 2 },
-  { id: "ON", name: "Ontario", abbreviation: "ON", spotted: false, points: 2 },
-  { id: "PE", name: "Prince Edward Island", abbreviation: "PE", spotted: false, points: 2 },
-  { id: "QC", name: "Quebec", abbreviation: "QC", spotted: false, points: 2 },
-  { id: "SK", name: "Saskatchewan", abbreviation: "SK", spotted: false, points: 2 },
-  { id: "YT", name: "Yukon", abbreviation: "YT", spotted: false, points: 2 },
-  { id: "NT", name: "Northwest Territories", abbreviation: "NT", spotted: false, points: 2 },
-  { id: "NU", name: "Nunavut", abbreviation: "NU", spotted: false, points: 2 }
+  // Canadian Provinces (2 points each) - Updated with correct 3-letter abbreviations
+  { id: "ALB", name: "Alberta", abbreviation: "ALB", spotted: false, points: 2 },
+  { id: "BCO", name: "British Columbia", abbreviation: "BCO", spotted: false, points: 2 },
+  { id: "MAN", name: "Manitoba", abbreviation: "MAN", spotted: false, points: 2 },
+  { id: "NBR", name: "New Brunswick", abbreviation: "NBR", spotted: false, points: 2 },
+  { id: "NFL", name: "Newfoundland and Labrador", abbreviation: "NFL", spotted: false, points: 2 },
+  { id: "NSC", name: "Nova Scotia", abbreviation: "NSC", spotted: false, points: 2 },
+  { id: "ONT", name: "Ontario", abbreviation: "ONT", spotted: false, points: 2 },
+  { id: "PEI", name: "Prince Edward Island", abbreviation: "PEI", spotted: false, points: 2 },
+  { id: "QUE", name: "Quebec", abbreviation: "QUE", spotted: false, points: 2 },
+  { id: "SAS", name: "Saskatchewan", abbreviation: "SAS", spotted: false, points: 2 },
+  { id: "YUK", name: "Yukon", abbreviation: "YUK", spotted: false, points: 2 },
+  { id: "NWT", name: "Northwest Territories", abbreviation: "NWT", spotted: false, points: 2 },
+  { id: "NUN", name: "Nunavut", abbreviation: "NUN", spotted: false, points: 2 }
 ];
 
 export const calculateScore = (spottedStates: StateData[]): number => {
