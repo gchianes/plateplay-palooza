@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { MapPin, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -54,8 +54,13 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
       <div className="flex items-center gap-2 mb-8">
-        <MapPin className="h-8 w-8 text-secondary" strokeWidth={3} />
-        <h1 className="text-3xl font-bold text-primary">License Plate Game</h1>
+        <Link to="/">
+          <img 
+            src="/lovable-uploads/75ce235d-a2c6-4de9-87d2-7f8fa9dc6fb1.png" 
+            alt="Plate Palooza Logo" 
+            className="h-20 mb-4" 
+          />
+        </Link>
       </div>
       
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">

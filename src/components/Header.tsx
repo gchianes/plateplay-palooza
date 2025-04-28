@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapPin, LogOut, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -13,8 +13,13 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <MapPin className="h-8 w-8 text-secondary" strokeWidth={3} />
-            <h1 className="text-3xl font-bold text-primary">License Plate Game</h1>
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/lovable-uploads/75ce235d-a2c6-4de9-87d2-7f8fa9dc6fb1.png" 
+                alt="Plate Palooza Logo" 
+                className="h-12 md:h-16"
+              />
+            </Link>
           </div>
           
           <div className="flex items-center space-x-4">
