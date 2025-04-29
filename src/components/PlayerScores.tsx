@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, UserPlus, X, Pen, RefreshCw } from 'lucide-react';
+import { Trophy, UserPlus, X, Pen, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
 import { Card } from '@/components/ui/card';
@@ -44,6 +43,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   const [editName, setEditName] = useState("");
   const [playerToRemove, setPlayerToRemove] = useState<number | null>(null);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
+  const [expandedPlayers, setExpandedPlayers] = useState<number[]>([]);
 
   const handleEditStart = (player: Player) => {
     let playerId = getNumericId(player.id);
@@ -100,6 +100,16 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     setShowNewGameConfirm(false);
   };
 
+  const togglePlayerStates = (playerId: number) => {
+    setExpandedPlayers(prev => {
+      if (prev.includes(playerId)) {
+        return prev.filter(id => id !== playerId);
+      } else {
+        return [...prev, playerId];
+      }
+    });
+  };
+
   const getSpottedStateNames = (stateIds: string[]) => {
     return stateIds
       .map(stateId => {
@@ -140,6 +150,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         {players.map((player) => {
           const playerId = getNumericId(player.id);
           const spottedStates = getSpottedStateNames(player.states);
+          const isExpanded = expandedPlayers.includes(playerId);
           
           return (
             <Card
@@ -198,21 +209,32 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                 </div>
               </div>
 
-              {/* Always show spotted states for each player */}
               {player.states.length > 0 && (
-                <div className="mt-3 pl-7">
-                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">
-                    Spotted States/Provinces:
-                  </h4>
-                  <ScrollArea className="max-h-[150px] w-full rounded-md border p-2">
-                    <div className="space-y-1">
-                      {spottedStates.map((name) => (
-                        <div key={name} className="text-xs sm:text-sm">
-                          {name}
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                <div className="mt-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full flex justify-between items-center text-sm font-semibold text-muted-foreground"
+                    onClick={() => togglePlayerStates(playerId)}
+                  >
+                    <span>Spotted States/Provinces: {player.states.length}</span>
+                    {isExpanded ? 
+                      <ChevronUp className="h-4 w-4" /> : 
+                      <ChevronDown className="h-4 w-4" />
+                    }
+                  </Button>
+                  
+                  {isExpanded && (
+                    <ScrollArea className="max-h-[150px] w-full rounded-md border p-2 mt-2">
+                      <div className="space-y-1">
+                        {spottedStates.map((name) => (
+                          <div key={name} className="text-xs sm:text-sm">
+                            {name}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
                 </div>
               )}
             </Card>
@@ -220,7 +242,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         })}
       </div>
 
-      {/* Remove Player Confirmation Dialog */}
       <AlertDialog open={playerToRemove !== null} onOpenChange={(open) => !open && setPlayerToRemove(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -236,7 +257,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* New Game Confirmation Dialog */}
       <AlertDialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
