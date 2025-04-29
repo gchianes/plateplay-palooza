@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, UserPlus, X, Pen, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trophy, UserPlus, X, Pen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
 
@@ -28,7 +29,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
-  const [expandedPlayers, setExpandedPlayers] = useState<number[]>([]);
 
   const handleEditStart = (player: Player) => {
     let playerId = getNumericId(player.id);
@@ -65,14 +65,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     onPlayerAdd();
   };
 
-  const togglePlayerExpansion = (playerId: number) => {
-    setExpandedPlayers(current => 
-      current.includes(playerId)
-        ? current.filter(id => id !== playerId)
-        : [...current, playerId]
-    );
-  };
-
   const getSpottedStateNames = (stateIds: string[]) => {
     return stateIds
       .map(stateId => {
@@ -102,7 +94,6 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
       <div className="space-y-4">
         {players.map((player) => {
           const playerId = getNumericId(player.id);
-          const isExpanded = expandedPlayers.includes(playerId);
           const spottedStates = getSpottedStateNames(player.states);
           
           return (
@@ -116,10 +107,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
               <div className="flex items-center justify-between">
                 <button
                   className="flex items-center space-x-3 flex-1"
-                  onClick={() => {
-                    onPlayerSelect(playerId);
-                    togglePlayerExpansion(playerId);
-                  }}
+                  onClick={() => onPlayerSelect(playerId)}
                 >
                   <Trophy className="h-4 w-4 text-accent" />
                   <div className="flex flex-col flex-1">
@@ -134,14 +122,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                       />
                     ) : (
                       <>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{player.name}</span>
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
+                        <span className="font-medium">{player.name}</span>
                         <span className="text-sm text-muted-foreground">
                           States/Provinces: {player.states.length} | Score: {player.score}
                         </span>
@@ -172,7 +153,8 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                 </div>
               </div>
 
-              {isExpanded && (
+              {/* Always show spotted states for each player */}
+              {player.states.length > 0 && (
                 <div className="mt-3 pl-7">
                   <h4 className="text-sm font-semibold text-muted-foreground mb-2">
                     Spotted States/Provinces:
