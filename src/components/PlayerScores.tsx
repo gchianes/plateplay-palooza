@@ -8,6 +8,16 @@ import { Trophy, UserPlus, X, Pen, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
 import { Card } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface PlayerScoresProps {
   players: Player[];
@@ -32,6 +42,8 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
+  const [playerToRemove, setPlayerToRemove] = useState<number | null>(null);
+  const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
 
   const handleEditStart = (player: Player) => {
     let playerId = getNumericId(player.id);
@@ -68,6 +80,26 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     onPlayerAdd();
   };
 
+  const handleRemovePlayerClick = (id: number) => {
+    setPlayerToRemove(id);
+  };
+
+  const handleConfirmRemovePlayer = () => {
+    if (playerToRemove !== null) {
+      onPlayerRemove(playerToRemove);
+      setPlayerToRemove(null);
+    }
+  };
+
+  const handleNewGameClick = () => {
+    setShowNewGameConfirm(true);
+  };
+
+  const handleConfirmNewGame = () => {
+    onNewGame();
+    setShowNewGameConfirm(false);
+  };
+
   const getSpottedStateNames = (stateIds: string[]) => {
     return stateIds
       .map(stateId => {
@@ -86,7 +118,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={onNewGame}
+            onClick={handleNewGameClick}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Start New Game
@@ -157,7 +189,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onPlayerRemove(playerId)}
+                      onClick={() => handleRemovePlayerClick(playerId)}
                       disabled={!canAddPlayer}
                     >
                       <X className="h-4 w-4 text-muted-foreground" />
@@ -187,6 +219,38 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
           );
         })}
       </div>
+
+      {/* Remove Player Confirmation Dialog */}
+      <AlertDialog open={playerToRemove !== null} onOpenChange={(open) => !open && setPlayerToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Player</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this player? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemovePlayer}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* New Game Confirmation Dialog */}
+      <AlertDialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start New Game</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to start a new game? All player progress will be reset.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmNewGame}>Start New Game</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
