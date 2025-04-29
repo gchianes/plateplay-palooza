@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trophy, UserPlus, X, Pen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
+import { Card } from '@/components/ui/card';
 
 interface PlayerScoresProps {
   players: Player[];
@@ -91,16 +92,17 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         )}
       </div>
 
-      <div className="space-y-4">
+      {/* Changed from space-y-4 to a grid layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {players.map((player) => {
           const playerId = getNumericId(player.id);
           const spottedStates = getSpottedStateNames(player.states);
           
           return (
-            <div
+            <Card
               key={playerId}
               className={cn(
-                "flex flex-col p-3 rounded-lg border",
+                "flex flex-col p-3 h-full",
                 activePlayer === playerId ? "bg-secondary/20 border-secondary" : "bg-background"
               )}
             >
@@ -159,7 +161,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                   <h4 className="text-sm font-semibold text-muted-foreground mb-2">
                     Spotted States/Provinces:
                   </h4>
-                  <ScrollArea className="max-h-[200px] w-full rounded-md border p-2">
+                  <ScrollArea className="max-h-[150px] w-full rounded-md border p-2">
                     <div className="space-y-1">
                       {spottedStates.map((name) => (
                         <div key={name} className="text-xs sm:text-sm">
@@ -170,7 +172,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                   </ScrollArea>
                 </div>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>
