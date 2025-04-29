@@ -25,7 +25,10 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md p-4 w-full">
       <div className="text-center mb-4">
-        <h2 className="text-xl font-bold text-primary">{playerName}</h2>
+        <h2 className="text-xl font-bold text-primary">
+          <span className="text-muted-foreground mr-2">Selected player:</span>
+          {playerName}
+        </h2>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="flex flex-col items-center justify-center p-2">
