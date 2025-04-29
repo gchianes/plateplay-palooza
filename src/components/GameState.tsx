@@ -2,7 +2,6 @@
 import React from 'react';
 import { Player } from '@/types/player';
 import { states } from '@/utils/stateData';
-import ScoreBoard from './ScoreBoard';
 import GameBoard from './game/GameBoard';
 import { useGameOperations } from '@/hooks/game/useGameOperations';
 
@@ -34,6 +33,7 @@ export function GameState({
     currentGameId
   });
 
+  // We're still calculating these values in case they're needed elsewhere
   const currentPlayer = players.find(p => p.id === activePlayer) || players[0];
   const spottedStates = currentPlayer?.states || [];
   const score = currentPlayer?.score || 0;
@@ -41,16 +41,7 @@ export function GameState({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <ScoreBoard 
-          spottedStates={spottedStates} 
-          totalStates={states.length} 
-          progress={progress} 
-          score={score}
-          playerName={currentPlayer?.name || ""}
-          currentPlayer={currentPlayer}
-        />
-      </div>
+      {/* ScoreBoard component has been removed */}
       
       <GameBoard
         isMapVisible={isMapVisible}
