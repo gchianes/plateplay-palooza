@@ -4,7 +4,7 @@ import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, UserPlus, X, Pen } from 'lucide-react';
+import { Trophy, UserPlus, X, Pen, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
 import { Card } from '@/components/ui/card';
@@ -16,6 +16,7 @@ interface PlayerScoresProps {
   onPlayerRemove: (id: number) => void;
   onPlayerSelect: (id: number) => void;
   onPlayerNameChange: (id: number, name: string) => void;
+  onNewGame: () => void;
   canAddPlayer?: boolean;
 }
 
@@ -26,6 +27,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
   onPlayerRemove,
   onPlayerSelect,
   onPlayerNameChange,
+  onNewGame,
   canAddPlayer = true,
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -80,16 +82,26 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Players</h2>
-        {players.length < 6 && canAddPlayer && (
+        <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             size="sm"
-            onClick={handleAddPlayerClick}
+            onClick={onNewGame}
           >
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add Player
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Start New Game
           </Button>
-        )}
+          {players.length < 6 && canAddPlayer && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleAddPlayerClick}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add Player
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

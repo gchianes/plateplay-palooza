@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Player } from '@/types/player';
 import PlayerScores from './PlayerScores';
 import { usePlayerOperations } from '@/hooks/player/usePlayerOperations';
+import { useGameOperations } from '@/hooks/game/useGameOperations';
 
 interface PlayerManagementProps {
   players: Player[];
@@ -36,6 +37,15 @@ export function PlayerManagement({
     globalSpottedStates,
     setGlobalSpottedStates
   });
+  
+  const { handleNewGame } = useGameOperations({
+    players,
+    setPlayers,
+    activePlayer,
+    globalSpottedStates,
+    setGlobalSpottedStates,
+    currentGameId
+  });
 
   const safeHandleAddPlayer = () => {
     console.log("Add player button clicked, current players:", players);
@@ -56,7 +66,8 @@ export function PlayerManagement({
       onPlayerRemove={handleRemovePlayer}
       onPlayerSelect={setActivePlayer}
       onPlayerNameChange={handleNameChange}
-      canAddPlayer={true} // Always enable the button
+      onNewGame={handleNewGame}
+      canAddPlayer={true}
     />
   );
 }

@@ -4,7 +4,6 @@ import { Player } from '@/types/player';
 import { states } from '@/utils/stateData';
 import ScoreBoard from './ScoreBoard';
 import GameBoard from './game/GameBoard';
-import GameControls from './game/GameControls';
 import { useGameOperations } from '@/hooks/game/useGameOperations';
 
 interface GameStateProps {
@@ -26,7 +25,7 @@ export function GameState({
   currentGameId,
   isMapVisible
 }: GameStateProps) {
-  const { handleToggleState, handleNewGame } = useGameOperations({
+  const { handleToggleState } = useGameOperations({
     players,
     setPlayers,
     activePlayer,
@@ -42,7 +41,7 @@ export function GameState({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4">
         <ScoreBoard 
           spottedStates={spottedStates} 
           totalStates={states.length} 
@@ -51,7 +50,6 @@ export function GameState({
           playerName={currentPlayer?.name || ""}
           currentPlayer={currentPlayer}
         />
-        <GameControls onNewGame={handleNewGame} />
       </div>
       
       <GameBoard
