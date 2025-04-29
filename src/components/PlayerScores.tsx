@@ -4,10 +4,11 @@ import { Player } from '@/types/player';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, UserPlus, X, Pen } from 'lucide-react';
+import { Trophy, UserPlus, X, Pen, ChevronDown, ChevronUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { states } from '@/utils/stateData';
 import { Card } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface PlayerScoresProps {
   players: Player[];
@@ -30,6 +31,7 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
+  const [expandedPlayers, setExpandedPlayers] = useState<number[]>([]);
 
   const handleEditStart = (player: Player) => {
     let playerId = getNumericId(player.id);
@@ -75,6 +77,14 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
       .filter(name => name)
       .sort((a, b) => a.localeCompare(b));
   };
+  
+  const toggleExpand = (playerId: number) => {
+    setExpandedPlayers(prev => 
+      prev.includes(playerId)
+        ? prev.filter(id => id !== playerId)
+        : [...prev, playerId]
+    );
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
@@ -92,11 +102,11 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
         )}
       </div>
 
-      {/* Changed from space-y-4 to a grid layout */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {players.map((player) => {
           const playerId = getNumericId(player.id);
           const spottedStates = getSpottedStateNames(player.states);
+          const isExpanded = expandedPlayers.includes(playerId);
           
           return (
             <Card
@@ -155,21 +165,53 @@ const PlayerScores: React.FC<PlayerScoresProps> = ({
                 </div>
               </div>
 
-              {/* Always show spotted states for each player */}
+              {/* Collapsible spotted states section */}
               {player.states.length > 0 && (
                 <div className="mt-3 pl-7">
-                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">
-                    Spotted States/Provinces:
-                  </h4>
-                  <ScrollArea className="max-h-[150px] w-full rounded-md border p-2">
-                    <div className="space-y-1">
-                      {spottedStates.map((name) => (
-                        <div key={name} className="text-xs sm:text-sm">
-                          {name}
-                        </div>
-                      ))}
+                  <Collapsible 
+                    open={isExpanded}
+                    className="w-full"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        Spotted States/Provinces:
+                      </h4>
+                      <CollapsibleTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="p-1 h-auto"
+                          onClick={() => toggleExpand(playerId)}
+                        >
+                          {isExpanded ? 
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" /> : 
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          }
+                        </Button>
+                      </CollapsibleTrigger>
                     </div>
-                  </ScrollArea>
+
+                    {/* Preview when collapsed - show first few states */}
+                    {!isExpanded && spottedStates.length > 0 && (
+                      <div className="text-xs sm:text-sm mt-1 text-muted-foreground">
+                        {spottedStates.slice(0, 3).join(', ')}
+                        {spottedStates.length > 3 && ` +${spottedStates.length - 3} more...`}
+                      </div>
+                    )}
+                    
+                    {/* Full list when expanded */}
+                    <CollapsibleContent>
+                      <ScrollArea className="max-h-[150px] w-full rounded-md border p-2 mt-2">
+                        <div className="space-y-1">
+                          {spottedStates.map((name) => (
+                            <div key={name} className="text-xs sm:text-sm">
+                              {name}
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               )}
             </Card>
