@@ -49,9 +49,9 @@ const Register = () => {
       <div className="flex items-center gap-2 mb-8">
         <Link to="/">
           <img 
-            src="/lovable-uploads/75ce235d-a2c6-4de9-87d2-7f8fa9dc6fb1.png" 
-            alt="Plate Palooza Logo" 
-            className="h-20 mb-4" 
+            src="/lovable-uploads/91df8de2-1492-4b95-a807-381c858ee9f8.png" 
+            alt="Plate Play Palooza Logo" 
+            className="h-24 mb-4" 
           />
         </Link>
       </div>
